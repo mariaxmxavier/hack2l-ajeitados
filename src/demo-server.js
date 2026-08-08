@@ -127,6 +127,7 @@ async function analisarPayload(payload) {
   return {
     conversaId,
     pipeline: resumirPipeline(resultado),
+    orchestrator: resumirOrquestracao(resultado, mensagens, threshold),
     fraude,
     threshold,
     notificacoes: alertaAtivo
@@ -185,6 +186,78 @@ function resumirPipeline(resultado) {
     risk: resultado.risk,
     decision: resultado.decision,
     retrieval: (resultado.retrieval ?? []).map(({ id, namespace, sourceType, title, score, metadata }) => ({ id, namespace, sourceType, title, score, metadata }))
+  };
+}
+
+function resumirOrquestracao(resultado, mensagens, threshold) {
+  const gorillaDisponivel = Boolean(resultado.gorilla);
+  const consulta = String(resultado.query ?? "");
+  const decisao = resultado.decision ?? {};
+  const recuperados = resultado.retrieval?.length ?? 0;
+  const envelopeGorilla = gorillaDisponivel
+    ? {
+        searchId: resultado.gorilla.search_id ?? null,
+        qualityGate: resultado.gorilla.quality_gate ?? null,
+        source: "gorilla subprocess"
+      }
+    : { status: "degraded", reason: resultado.gorillaError ?? "Gorilla sem resposta" };
+  const statusGorilla = gorillaDisponivel ? "concluido" : "degradado";
+
+  return {
+    controller: "preto-velho",
+    mode: resultado.gorillaError ? "degraded" : "deterministic",
+    input: {
+      conversationId: mensagens.at(-1)?.conversaId ?? "demo",
+      messages: mensagens.length,
+      threshold,
+      query: consulta.slice(0, 220)
+    },
+    gorillaOutput: envelopeGorilla,
+    steps: [
+      {
+        agent: "normalizar_conversa",
+        purpose: "Extrai texto e transcricoes para uma consulta unica.",
+        input: `${mensagens.length} mensagem(ns) recebida(s)`,
+        output: `${consulta.length} caracteres normalizados`,
+        status: "concluido"
+      },
+      {
+        agent: "gorilla_search",
+        purpose: "Executa o subprocesso Gorilla com isolamento de entrada e saida JSON.",
+        input: consulta.slice(0, 120) || "consulta vazia",
+        output: gorillaDisponivel ? `search_id ${resultado.gorilla.search_id ?? "gerado"}` : envelopeGorilla.reason,
+        status: statusGorilla
+      },
+      {
+        agent: "validar_e_construir_okf",
+        purpose: "Aceita somente envelope valido e preserva a proveniencia do conhecimento dinamico.",
+        input: gorillaDisponivel ? "envelope Gorilla" : "modo degradado",
+        output: gorillaDisponivel ? "OKF dinamico indexado e removido ao final" : "OKF dinamico nao criado",
+        status: gorillaDisponivel ? "concluido" : "ignorado"
+      },
+      {
+        agent: "rag_langgraph",
+        purpose: "Recupera evidencias reviewed, conversation e dynamic com namespaces separados.",
+        input: consulta.slice(0, 120) || "consulta vazia",
+        output: `${recuperados} evidencia(s) com proveniencia`,
+        status: "concluido"
+      },
+      {
+        agent: "politica_de_risco",
+        purpose: "Aplica limiares fixos e escalona quando a execucao esta degradada.",
+        input: `risco ${Math.round((resultado.risk?.riskScore ?? 0) * 100)}%; threshold ${Math.round((decisao.threshold ?? threshold) * 100)}%`,
+        output: `acao ${decisao.action ?? "escalar"}`,
+        status: "concluido"
+      },
+      {
+        agent: "cleanup",
+        purpose: "Remove namespace dinamico e arquivos temporarios da execucao.",
+        input: resultado.dynamicNamespace ?? "namespace dinamico",
+        output: "cleanup garantido por finally",
+        status: "concluido"
+      }
+    ],
+    output: `Decisao ${decisao.action ?? "escalar"}: ${decisao.recommendedAction ?? "revisar evidencias"}.`
   };
 }
 

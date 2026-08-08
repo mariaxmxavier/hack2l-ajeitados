@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Demonstração local da pipeline antifraude para conversas de WhatsApp.">
-    <title>Sentinela — Demonstração Antifraude</title>
+    <meta name="description" content="Zé Seguro: demonstração local, determinística e orquestrada de prevenção a golpes.">
+    <title>Zé Seguro — O seguro morreu de velho</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
@@ -12,8 +12,8 @@
       <header class="product-header">
         <div class="brand-mark" aria-hidden="true"><span></span></div>
         <div>
-          <p class="eyebrow">Pipeline antifraude em tempo real</p>
-          <h1>Sentinela <span>protege a conversa antes do prejuízo.</span></h1>
+          <p class="eyebrow">Pipeline antifraude determinística</p>
+          <h1>Zé Seguro <span>O seguro morreu de velho.</span></h1>
         </div>
         <div class="system-health"><i></i> Pipeline local online</div>
       </header>
@@ -95,6 +95,30 @@
               <li data-stage="6"><b>7</b><span>Decisão</span></li>
               <li data-stage="7"><b>8</b><span>Alerta</span></li>
             </ol>
+            <article id="stageDetail" class="stage-detail" aria-live="polite">
+              <span class="stage-detail-index">01</span>
+              <div><strong>Entrada da conversa</strong><p>O orquestrador normaliza texto e áudio antes de delegar o próximo trabalho.</p></div>
+              <span class="stage-detail-output">entrada normalizada</span>
+            </article>
+          </section>
+
+          <nav class="execution-tabs" aria-label="Visões da execução" role="tablist">
+            <button type="button" class="execution-tab is-active" data-view="decision" role="tab" aria-selected="true">Decisão</button>
+            <button type="button" class="execution-tab" data-view="orchestrator" role="tab" aria-selected="false">Orquestrador Preto-Velho</button>
+          </nav>
+
+          <section id="orchestratorPanel" class="orchestrator-panel" aria-label="Execução do orquestrador Preto-Velho" hidden>
+            <header class="orchestrator-header">
+              <div><p class="eyebrow">Execução auditável</p><h3>Preto-Velho coordena workers determinísticos</h3></div>
+              <span id="orchestratorMode" class="deterministic-chip">Determinístico</span>
+            </header>
+            <div class="orchestrator-flow" aria-label="Fluxo de entrada, workers e saída">
+              <section class="flow-io"><span>Entrada</span><pre id="orchestratorInput">Aguardando uma conversa.</pre></section>
+              <div class="flow-arrow" aria-hidden="true">↓</div>
+              <section class="flow-io gorilla-io"><span>Saída do Gorilla</span><pre id="gorillaOutput">Aguardando consulta.</pre></section>
+            </div>
+            <ol id="agentTrace" class="agent-trace"><li class="trace-empty">Os workers serão listados com suas entradas e saídas.</li></ol>
+            <section class="orchestrator-outcome"><span>Saída consolidada</span><p id="orchestratorDecision">A decisão só é emitida após todas as etapas concluírem.</p></section>
           </section>
 
           <section class="result-grid" aria-label="Resultado da análise">

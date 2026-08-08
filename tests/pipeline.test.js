@@ -78,6 +78,10 @@ test("API do mockup executa a pipeline oficial e registra uma acao", async (t) =
   assert.equal(payload.pipeline.pipeline, "antifraude");
   assert.ok(payload.pipeline.retrieval.length > 0);
   assert.ok(payload.fraude.pontuacao.sinais.includes("pedido de Pix ou devolucao"));
+  assert.equal(payload.orchestrator.controller, "preto-velho");
+  assert.equal(payload.orchestrator.mode, "deterministic");
+  assert.equal(payload.orchestrator.steps.length, 6);
+  assert.equal(payload.orchestrator.steps[1].agent, "gorilla_search");
 
   const action = await fetch(`${baseUrl}/api/acoes`, {
     method: "POST",

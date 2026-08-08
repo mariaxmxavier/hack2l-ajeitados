@@ -17,6 +17,26 @@ const matchesEl = document.querySelector("#matches");
 const decisionSummaryEl = document.querySelector("#decisionSummary");
 const pipelineOutputEl = document.querySelector("#pipelineOutput");
 const architectureSteps = [...document.querySelectorAll("#architectureRail li")];
+const stageDetailEl = document.querySelector("#stageDetail");
+const executionTabs = [...document.querySelectorAll(".execution-tab")];
+const decisionPanel = document.querySelector(".result-grid");
+const orchestratorPanel = document.querySelector("#orchestratorPanel");
+const orchestratorInputEl = document.querySelector("#orchestratorInput");
+const gorillaOutputEl = document.querySelector("#gorillaOutput");
+const agentTraceEl = document.querySelector("#agentTrace");
+const orchestratorDecisionEl = document.querySelector("#orchestratorDecision");
+const orchestratorModeEl = document.querySelector("#orchestratorMode");
+
+const etapasArquitetura = [
+  ["Entrada da conversa", "O orquestrador normaliza texto e audio antes de delegar o proximo trabalho.", "entrada normalizada"],
+  ["Consulta Gorilla", "O worker Gorilla recebe somente a consulta normalizada e retorna um envelope JSON isolado.", "response.json ou falha controlada"],
+  ["Validacao do envelope", "Campos obrigatorios, qualidade e formato sao verificados antes de qualquer documento ser criado.", "resultado validado"],
+  ["Builder OKF", "O retorno validado e transformado em documentos de conhecimento com proveniencia e namespace dinamico.", "OKF dinamico"],
+  ["Conhecimento unificado", "Corpus revisado, memoria da conversa e OKF dinamico sao consultados sem misturar suas origens.", "evidencias rastreaveis"],
+  ["RAG + LangGraph", "O grafo recupera, combina e classifica evidencias. Cada no recebe o estado anterior e produz o proximo.", "contexto de decisao"],
+  ["Politica deterministica", "Regras fixas aplicam threshold, evidencia e modo degradado; nao ha decisao probabilistica nesta etapa.", "liberar, escalar ou pausar"],
+  ["Alerta e limpeza", "A orientacao e exibida e o namespace temporario do run e removido mesmo quando ocorre falha.", "alerta operacional + cleanup"]
+];
 
 let eventos = [];
 let historico = [];
@@ -28,6 +48,24 @@ let ultimaAnalise = null;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 renderizarEstadoInicial();
+renderizarDetalheEtapa(0);
+
+executionTabs.forEach((tab) => {
+  tab.addEventListener("click", () => selecionarVisao(tab.dataset.view));
+});
+
+architectureSteps.forEach((etapa, indice) => {
+  etapa.tabIndex = 0;
+  etapa.setAttribute("role", "button");
+  etapa.setAttribute("aria-label", `Abrir detalhes da etapa ${indice + 1}`);
+  etapa.addEventListener("click", () => atualizarArquitetura(indice));
+  etapa.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      atualizarArquitetura(indice);
+    }
+  });
+});
 
 thresholdEl.addEventListener("input", () => {
   thresholdValueEl.textContent = `${thresholdEl.value}%`;
@@ -184,6 +222,7 @@ function finalizarTransicao(transicao, mensagem, estado) {
     etapa.classList.remove("is-current");
     etapa.classList.add("is-complete");
   });
+  renderizarDetalheEtapa(7);
   transicao.resultado.textContent = mensagem;
   rolarConversa();
 }
@@ -193,6 +232,54 @@ function atualizarArquitetura(indiceAtivo) {
     etapa.classList.toggle("is-complete", indice < indiceAtivo);
     etapa.classList.toggle("is-current", indice === indiceAtivo);
   });
+  renderizarDetalheEtapa(Math.max(0, indiceAtivo));
+}
+
+function renderizarDetalheEtapa(indice) {
+  const [titulo, descricao, saida] = etapasArquitetura[Math.min(indice, etapasArquitetura.length - 1)];
+  stageDetailEl.innerHTML = `
+    <span class="stage-detail-index">${String(indice + 1).padStart(2, "0")}</span>
+    <div><strong>${titulo}</strong><p>${descricao}</p></div>
+    <span class="stage-detail-output">${saida}</span>
+  `;
+}
+
+function selecionarVisao(view) {
+  const orquestradorAtivo = view === "orchestrator";
+  decisionPanel.hidden = orquestradorAtivo;
+  orchestratorPanel.hidden = !orquestradorAtivo;
+  executionTabs.forEach((tab) => {
+    const ativo = tab.dataset.view === view;
+    tab.classList.toggle("is-active", ativo);
+    tab.setAttribute("aria-selected", String(ativo));
+  });
+}
+
+function renderizarOrquestracao(orquestracao) {
+  if (!orquestracao) {
+    orchestratorModeEl.textContent = "Deterministico";
+    orchestratorInputEl.textContent = "Aguardando uma conversa.";
+    gorillaOutputEl.textContent = "Aguardando consulta.";
+    agentTraceEl.innerHTML = "<li class=\"trace-empty\">Os workers serao listados com suas entradas e saidas.</li>";
+    orchestratorDecisionEl.textContent = "A decisao so e emitida apos todas as etapas concluirem.";
+    return;
+  }
+
+  orchestratorModeEl.textContent = orquestracao.mode === "deterministic" ? "Deterministico" : "Degradado";
+  orchestratorInputEl.textContent = JSON.stringify(orquestracao.input, null, 2);
+  gorillaOutputEl.textContent = JSON.stringify(orquestracao.gorillaOutput, null, 2);
+  agentTraceEl.innerHTML = "";
+  for (const passo of orquestracao.steps) {
+    const item = document.createElement("li");
+    item.className = `agent-step is-${passo.status}`;
+    item.innerHTML = `
+      <div class="agent-step-head"><strong>${escapeHtml(passo.agent)}</strong><span>${escapeHtml(passo.status)}</span></div>
+      <p>${escapeHtml(passo.purpose)}</p>
+      <dl><div><dt>Entrada</dt><dd>${escapeHtml(passo.input)}</dd></div><div><dt>Saida</dt><dd>${escapeHtml(passo.output)}</dd></div></dl>
+    `;
+    agentTraceEl.append(item);
+  }
+  orchestratorDecisionEl.textContent = orquestracao.output;
 }
 
 function selecionarEventos(lista, cenario) {
@@ -307,6 +394,8 @@ function reiniciarDemo() {
   pararAudioAtual();
   atualizarAnalise(null);
   atualizarArquitetura(-1);
+  renderizarOrquestracao(null);
+  selecionarVisao("decision");
   statusBadge.textContent = "Pronto";
   startButton.disabled = false;
   scenarioEl.disabled = false;
@@ -532,6 +621,7 @@ function atualizarAnalise(analise) {
     ? `Decisao: ${(decisao?.action ?? "escalar").replaceAll("_", " ")} — ${decisao?.recommendedAction ?? "revisar evidencias."}${analise.pipeline?.gorillaError ? " (modo degradado)" : ""}`
     : "Decisao: aguardando analise.";
   pipelineOutputEl.textContent = analise ? JSON.stringify(analise.pipeline, null, 2) : "Aguardando execucao.";
+  renderizarOrquestracao(analise?.orchestrator ?? null);
   alertBox.hidden = !alertaAtivo;
   familyNotice.hidden = !alertaAtivo;
 
