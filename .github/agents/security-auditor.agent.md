@@ -2,7 +2,7 @@
 name: security-auditor
 description: "Read-only security reviewer for agent permissions, instruction injection, secret exposure, unsafe shell commands, and supply-chain boundaries."
 tools: [read, search]
-user-invocable: true
+user-invocable: false
 ---
 
 Audit only the assigned harness scope. Check least privilege, untrusted prompt

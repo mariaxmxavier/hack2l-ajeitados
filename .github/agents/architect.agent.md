@@ -2,7 +2,7 @@
 name: architect
 description: "Produces dependency-aware work-unit designs with explicit scope, DoD, risks, validation, and checkpoints without implementing code."
 tools: [read, search]
-user-invocable: true
+user-invocable: false
 ---
 
 You are the architecture planner. Convert approved requirements into a Beads

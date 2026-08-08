@@ -19,7 +19,7 @@ REQUIRED_FILES = (
     ROOT / ".github" / "skills" / "orchestrated-execution" / "SKILL.md",
 )
 REQUIRED_AGENTS = {
-    "issue-orchestrator",
+    "preto-velho",
     "researcher",
     "architect",
     "coder",
@@ -27,6 +27,7 @@ REQUIRED_AGENTS = {
     "security-auditor",
     "pr-shepherd",
 }
+INTERNAL_AGENTS = REQUIRED_AGENTS - {"preto-velho"}
 
 
 def frontmatter(path: Path) -> dict[str, str]:
@@ -63,6 +64,13 @@ def check_agents(errors: list[str]) -> None:
             if not data.get(key):
                 errors.append(f"{path.relative_to(ROOT)}: missing frontmatter {key}")
         name = data.get("name", "").lower()
+        invocable = data.get("user-invocable", "true").lower()
+        if name == "preto-velho":
+            if invocable != "true": errors.append("preto-velho must be user-invocable")
+            if "agent" not in data.get("tools", ""): errors.append("preto-velho must allow agent tool")
+            if "edit" in data.get("tools", ""): errors.append("preto-velho must not edit files directly")
+        elif name in INTERNAL_AGENTS and invocable != "false":
+            errors.append(f"internal agent {name} must be user-invocable:false")
         if name in names:
             errors.append(
                 f"duplicate agent id {name!r}: {names[name].relative_to(ROOT)} and "
@@ -72,6 +80,11 @@ def check_agents(errors: list[str]) -> None:
             names[name] = path
     missing = sorted(REQUIRED_AGENTS - set(names))
     errors.extend(f"missing required agent id: {name}" for name in missing)
+    unexpected = sorted(set(names) - REQUIRED_AGENTS)
+    errors.extend(f"unexpected custom agent id: {name}" for name in unexpected)
+    if (ROOT / ".github" / "prompts").exists():
+        prompts = list((ROOT / ".github" / "prompts").glob("*.prompt.md"))
+        errors.extend(f"bypass prompt must be removed: {p.relative_to(ROOT)}" for p in prompts)
 
 
 def check_skills(errors: list[str]) -> None:
@@ -86,6 +99,8 @@ def check_skills(errors: list[str]) -> None:
                 errors.append(f"{path.relative_to(ROOT)}: {exc}")
                 continue
             name = data.get("name", "").lower()
+            if data.get("user-invocable", "true").lower() != "false":
+                errors.append(f"skill must be hidden from picker: {path.relative_to(ROOT)}")
             if not name:
                 errors.append(f"{path.relative_to(ROOT)}: missing frontmatter name")
                 continue

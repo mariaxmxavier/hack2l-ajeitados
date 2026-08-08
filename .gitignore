@@ -220,6 +220,7 @@ __marimo__/
 # Beads / Dolt files (added by bd init)
 .dolt/
 *.db
+.agent-observability/events.jsonl
 .beads-credential-key
 .beads/proxieddb/
 

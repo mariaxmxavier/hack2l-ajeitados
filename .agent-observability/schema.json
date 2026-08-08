@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Observability Event",
+  "type": "object",
+  "required": ["version", "timestamp", "type", "sessionId", "agentId"],
+  "properties": {
+    "version": { "const": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "type": {
+      "enum": [
+        "session_start", "route_decision", "agent_spawn", "agent_status",
+        "agent_complete", "agent_failed", "task_assign", "tool_start",
+        "tool_end", "handoff", "gate_enter", "gate_result",
+        "dependency_wait", "bead_update", "session_end"
+      ]
+    },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "agentId": { "type": "string", "minLength": 1 },
+    "parentAgentId": { "type": "string" },
+    "targetAgentId": { "type": "string" },
+    "targetRole": { "type": "string" },
+    "beadId": { "type": "string" },
+    "phase": { "type": "string" },
+    "task": { "type": "string" },
+    "reason": { "type": "string" },
+    "runtime": { "enum": ["claude", "codex", "gemini", "copilot"] },
+    "metadata": { "type": "object" }
+  },
+  "additionalProperties": true
+}

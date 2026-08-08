@@ -2,9 +2,11 @@
 
 ## Project State
 
-- This repository is intentionally a project skeleton. No application stack, build command, test command, or deployment target has been selected.
-- Do not invent a framework or scaffold application code. Use the `bootstrap-hackathon` prompt after the product brief and technology choices are explicit.
-- When the team adopts tooling, record the authoritative install, run, format, and test commands in the README and update this file if the workflow changes.
+- The repository contains a Node ESM LangGraph/WhatsApp pipeline and a small
+	JSONL observability bridge for the separate Agent Flow repository.
+- Record authoritative install, run, format, and test commands in the README
+	and update this file if the workflow changes. Do not merge Agent Flow into
+	this repository.
 
 ## Beads Workflow
 
@@ -40,3 +42,12 @@
 - Discover and run the project's actual validation commands. Do not claim a validation command exists until it has been added and checked.
 - The configured Beads policy is `team-maintainer`: agents may close tasks, synchronize Beads, commit, and push after successful validation when no direct instruction prohibits it and local Git identity/authentication are configured.
 - Report the task ID, changed files, validation, and synchronization status at handoff.
+
+## Canonical entrypoint
+
+- Use `npm run preto-velho -- "request"` (ou `copilot --agent=preto-velho`) para
+  implementação. `preto-velho` é o único agente customizado público; os demais
+  perfis são workers internos.
+- O orquestrador cria/assume Beads, despacha apenas unidades prontas e
+  isoladas, valida independentemente, obtém revisão adversarial e acompanha o
+  branch até PR/CI antes de fechar o épico.

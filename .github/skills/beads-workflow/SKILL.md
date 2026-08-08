@@ -2,6 +2,8 @@
 name: beads-workflow
 description: "Use when: creating, prioritizing, claiming, updating, closing, or synchronizing Beads tasks; planning dependency-aware work; or recovering the shared task workflow."
 argument-hint: "Task, issue ID, or planning goal"
+user-invocable: false
+disable-model-invocation: false
 ---
 
 # Beads Workflow

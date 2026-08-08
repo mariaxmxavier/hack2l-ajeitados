@@ -1,6 +1,8 @@
 ---
 name: work-unit-contract
 description: "Defines the durable Beads work-unit contract and file ownership rules for Copilot Fleet execution."
+user-invocable: false
+disable-model-invocation: false
 ---
 
 Every implementation issue must state:
