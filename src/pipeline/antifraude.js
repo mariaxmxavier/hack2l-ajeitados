@@ -69,7 +69,7 @@ async function retrieveAndDecide(state) {
       excludeConversationId: state.conversationId
     });
     const risk = assessRisk(hits, state.gorillaError);
-    const decision = decide(risk, state.gorillaError);
+    const decision = decide(risk, state.gorillaError, state.options.riskThreshold);
     const conversation = documentFromConversation(state.conversationId, state.resultadoProcessamento?.entradas ?? []);
     upsertDocuments(db, [conversation]);
     return { dynamicNamespace, retrieval: hits, risk, decision, status: decision.action === "escalar" && state.gorillaError ? "degraded" : "completed" };
@@ -92,14 +92,28 @@ function assessRisk(hits, gorillaError) {
   };
 }
 
-function decide(risk, gorillaError) {
-  const action = gorillaError || risk.riskScore < 0.45 ? "escalar" : risk.riskScore >= 0.75 ? "pausar" : "escalar";
+function decide(risk, gorillaError, configuredThreshold) {
+  const threshold = Number.isFinite(configuredThreshold)
+    ? Math.min(0.95, Math.max(0.45, configuredThreshold))
+    : 0.75;
+  const action = gorillaError
+    ? "escalar"
+    : risk.riskScore >= threshold
+      ? "pausar"
+      : risk.riskScore >= 0.45
+        ? "escalar"
+        : "liberar";
   return {
     action,
     riskScore: risk.riskScore,
     classification: risk.classification,
+    threshold,
     reasons: [gorillaError ? "Gorilla indisponível; execução degradada." : null, `Encontradas ${risk.evidenceCount} evidências recuperadas.`, `Sinais antifraude: ${risk.signals}.`].filter(Boolean),
-    recommendedAction: action === "pausar" ? "Não prosseguir e revisar evidências." : "Escalar para revisão humana."
+    recommendedAction: action === "pausar"
+      ? "Não prosseguir e revisar evidências."
+      : action === "escalar"
+        ? "Escalar para revisão humana."
+        : "Nenhuma intervenção necessária; manter monitoramento."
   };
 }
 

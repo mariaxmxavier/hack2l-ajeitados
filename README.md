@@ -8,31 +8,30 @@ unificado e retorna uma recomendacao operacional (`pausar` ou `escalar`).
 
 Abra um terminal nessa pasta e execute os comandos abaixo.
 
-### Windows PowerShell
+### Windows PowerShell — demonstração pelo mockup
 
 ```powershell
 npm install
 python -m pip install -r gorilla/requirements.txt
-npm start
+npm run demo
 ```
 
-### Linux/macOS
+Abra **http://localhost:5173**. Se essa porta estiver ocupada, o terminal informa a próxima porta escolhida. Na tela, selecione um exemplo, clique em **Iniciar demo**, acompanhe a conversa, a consulta Gorilla, o RAG, a decisão e a ação simulada de bloquear contato. A seção **Ver saída técnica da pipeline** mostra o envelope retornado pelo LangGraph.
+
+### Linux/macOS — demonstração pelo mockup
 
 ```bash
 npm install
 python3 -m pip install -r gorilla/requirements.txt
-npm start
+npm run demo
 ```
 
-O `npm start` usa uma resposta Gorilla de fixture, portanto nao precisa de API
-key e nao faz chamadas externas. A primeira execucao cria o indice local em
-`data/index/knowledge.sqlite`. Ao final, o terminal mostra:
+`npm run demo` usa a pipeline oficial e uma resposta Gorilla de fixture, portanto não precisa de API key e não faz chamadas externas. A primeira execução cria o índice local em `data/index/knowledge.sqlite`; a decisão, o quality gate e as evidências ficam visíveis na interface.
 
-```text
-pipeline: antifraude
-status: completed
-qualityGate: passed
-action: escalar
+Para executar somente a pipeline pelo terminal, sem a interface:
+
+```powershell
+npm start
 ```
 
 Para repetir a demonstracao com outra entrada JSON:
@@ -69,7 +68,7 @@ No PowerShell:
 ```powershell
 $env:GORILLA_OFFLINE="0"
 $env:GORILLA_API_KEY="sua-chave"
-npm start
+npm run demo
 ```
 
 No Linux/macOS:
@@ -77,7 +76,7 @@ No Linux/macOS:
 ```bash
 export GORILLA_OFFLINE=0
 export GORILLA_API_KEY="sua-chave"
-npm start
+npm run demo
 ```
 
 Nunca commite `.env` ou chaves. Para voltar ao modo demonstracao, remova
@@ -111,6 +110,8 @@ src/entrypoints/       entradas CLI
 src/pipeline/          grafo LangGraph antifraude
 src/knowledge/         parser OKF, embeddings e indice SQLite/FTS5
 src/integrations/      Gorilla subprocesso e integracoes externas
+src/demo-server.js     API local que conecta o mockup ao LangGraph
+public/                mockup web servido por npm run demo
 knowledge/reviewed/    fonte canonica OKF versionada
 gorilla/               cliente Python e pipeline de bundle OKF
 tests/                 testes unitarios e integrados

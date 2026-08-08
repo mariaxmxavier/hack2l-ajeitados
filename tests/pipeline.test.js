@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseOkf, openKnowledgeIndex, retrieve, toDocument, upsertDocuments } from "../src/knowledge/index.js";
 import { executarPipelineAntifraude } from "../src/pipeline/antifraude.js";
+import { createDemoServer } from "../src/demo-server.js";
 
 test("parseOkf preserva metadados e conteúdo", () => {
   const parsed = parseOkf("---\ntype: scam-evidence\ntags:\n  - pix\n  - phishing\n---\n\n# Evidência\n");
@@ -38,6 +39,46 @@ test("pipeline offline executa Gorilla, RAG e decisão", async () => {
   assert.ok(["pausar", "escalar"].includes(result.decision.action));
   const bundlePath = result.gorilla.bundlePath;
   assert.equal(await fileExists(bundlePath), false, "artefato temporário deve ser removido");
+});
+
+test("API do mockup executa a pipeline oficial e registra uma acao", async (t) => {
+  const server = createDemoServer();
+  await new Promise((resolveListen) => server.listen(0, "127.0.0.1", resolveListen));
+  t.after(() => server.close());
+  const { port } = server.address();
+  const baseUrl = `http://127.0.0.1:${port}`;
+
+  const health = await fetch(`${baseUrl}/api/health`).then((response) => response.json());
+  assert.equal(health.pipeline, "antifraude");
+
+  const response = await fetch(`${baseUrl}/api/analisar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      threshold: 0.7,
+      mensagens: [{
+        id: "mockup-1",
+        conversaId: "mockup-test",
+        autor: "cliente",
+        tipo: "texto",
+        conteudo: "Faca um Pix urgente para esta chave e nao conte para ninguem.",
+        timestamp: new Date().toISOString()
+      }]
+    })
+  });
+  const payload = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(payload.pipeline.pipeline, "antifraude");
+  assert.ok(payload.pipeline.retrieval.length > 0);
+  assert.ok(payload.fraude.pontuacao.sinais.includes("pedido de Pix ou devolucao"));
+
+  const action = await fetch(`${baseUrl}/api/acoes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ runId: payload.pipeline.runId, action: "bloquear_contato" })
+  }).then((result) => result.json());
+  assert.equal(action.status, "registrada");
+  assert.equal(action.simulated, true);
 });
 
 async function fileExists(path) {

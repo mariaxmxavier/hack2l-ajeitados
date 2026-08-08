@@ -70,6 +70,7 @@
           <span>Risco atual</span>
           <strong id="riskScore">0%</strong>
           <p id="scoreBreakdown" class="score-breakdown">Aguardando saida da pipeline.</p>
+          <p id="decisionSummary" class="decision-summary">Decisao: aguardando analise.</p>
           <div class="meter-track">
             <div id="riskBar" class="meter-fill"></div>
           </div>
@@ -94,6 +95,11 @@
           <h2>Casos parecidos no RAG</h2>
           <ol id="matches"></ol>
         </section>
+
+        <details class="analysis-card pipeline-details">
+          <summary>Ver saida tecnica da pipeline</summary>
+          <pre id="pipelineOutput">Aguardando execucao.</pre>
+        </details>
       </aside>
     </main>
 

@@ -12,6 +12,8 @@ const alertBox = document.querySelector("#alertBox");
 const familyNotice = document.querySelector("#familyNotice");
 const signalsEl = document.querySelector("#signals");
 const matchesEl = document.querySelector("#matches");
+const decisionSummaryEl = document.querySelector("#decisionSummary");
+const pipelineOutputEl = document.querySelector("#pipelineOutput");
 
 let eventos = [];
 let historico = [];
@@ -19,6 +21,7 @@ let rodando = false;
 let audioAtual = null;
 let audioOrientacao = null;
 let ultimoCenarioAleatorio = null;
+let ultimaAnalise = null;
 
 thresholdEl.addEventListener("input", () => {
   thresholdValueEl.textContent = `${thresholdEl.value}%`;
@@ -92,22 +95,32 @@ function receberMensagem(mensagemOriginal) {
 async function analisarHistorico() {
   statusBadge.textContent = "Analisando";
 
-  const analise = await fetch("/api/analisar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      mensagens: historico,
-      threshold: Number(thresholdEl.value) / 100
-    })
-  }).then((res) => res.json());
+  let analise;
+  try {
+    const resposta = await fetch("/api/analisar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mensagens: historico,
+        threshold: Number(thresholdEl.value) / 100
+      })
+    });
+    analise = await resposta.json();
+    if (!resposta.ok) throw new Error(analise.erro ?? "Falha ao executar a pipeline.");
+  } catch (error) {
+    statusBadge.textContent = "Falha na analise";
+    scoreBreakdown.textContent = error.message;
+    return;
+  }
 
+  ultimaAnalise = analise;
   atualizarAnalise(analise);
 
   if (analise.notificacoes.length && !document.querySelector(".security-alert-message")) {
     renderizarAlertaSeguranca(analise);
   }
 
-  statusBadge.textContent = analise.notificacoes.length ? "Alerta enviado" : "Monitorando";
+  statusBadge.textContent = analise.notificacoes.length ? "Alerta enviado" : "Analise concluida";
 }
 
 function selecionarEventos(lista, cenario) {
@@ -224,6 +237,7 @@ function eventoRapido(mensagem) {
 
 function reiniciarDemo() {
   historico = [];
+  ultimaAnalise = null;
   rodando = false;
   messagesEl.innerHTML = "";
   pararAudioAtual();
@@ -344,13 +358,14 @@ function renderizarAlertaSeguranca(analise) {
     </div>
     <div class="alert-actions">
       <button type="button" id="guideButton">Tocar orientacao</button>
-      <button type="button" class="danger">Bloquear contato</button>
+      <button type="button" class="danger" id="blockButton">Bloquear contato</button>
     </div>
   `;
 
   messagesEl.append(alerta);
   alerta.querySelector("#voiceButton").addEventListener("click", tocarOrientacao);
   alerta.querySelector("#guideButton").addEventListener("click", tocarOrientacao);
+  alerta.querySelector("#blockButton").addEventListener("click", bloquearContato);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
@@ -413,9 +428,14 @@ function atualizarAnalise(analise) {
   riskScore.textContent = `${percentual}%`;
   riskBar.style.width = `${percentual}%`;
   riskBar.dataset.risco = analise?.fraude?.risco ?? "baixo";
+  const decisao = analise?.pipeline?.decision;
   scoreBreakdown.textContent = analise
-    ? `Pipeline: final ${percentual}% = RAG ${Math.round((analise.fraude?.rag?.score ?? 0) * 100)}% x 55% + sinais ${Math.round((analise.fraude?.pontuacao?.score ?? 0) * 100)}% x 45%.`
+    ? `Pipeline oficial: risco ${percentual}%, melhor evidencia RAG ${Math.round((analise.fraude?.rag?.score ?? 0) * 100)}%, threshold ${Math.round((decisao?.threshold ?? analise.threshold ?? 0.7) * 100)}%.`
     : "Aguardando saida da pipeline.";
+  decisionSummaryEl.textContent = analise
+    ? `Decisao: ${(decisao?.action ?? "escalar").replaceAll("_", " ")} — ${decisao?.recommendedAction ?? "revisar evidencias."}${analise.pipeline?.gorillaError ? " (modo degradado)" : ""}`
+    : "Decisao: aguardando analise.";
+  pipelineOutputEl.textContent = analise ? JSON.stringify(analise.pipeline, null, 2) : "Aguardando execucao.";
   alertBox.hidden = !alertaAtivo;
   familyNotice.hidden = !alertaAtivo;
 
@@ -433,12 +453,40 @@ function atualizarAnalise(analise) {
   matchesEl.innerHTML = "";
   for (const match of matches) {
     const li = document.createElement("li");
-    li.innerHTML = `<strong>${match.rotulo}/${match.categoria}</strong><span>${Math.round(match.similaridade * 100)}% similar</span>`;
+    const titulo = document.createElement("strong");
+    const similaridade = document.createElement("span");
+    titulo.textContent = `${match.rotulo}/${match.categoria}`;
+    similaridade.textContent = `${Math.round(match.similaridade * 100)}% similar`;
+    li.append(titulo, similaridade);
     matchesEl.append(li);
   }
 
   if (matches.length === 0) {
     matchesEl.innerHTML = "<li>Aguardando mensagens.</li>";
+  }
+}
+
+async function bloquearContato(event) {
+  const button = event.currentTarget;
+  const runId = ultimaAnalise?.pipeline?.runId;
+  if (!runId) return;
+
+  button.disabled = true;
+  button.textContent = "Registrando...";
+  try {
+    const resposta = await fetch("/api/acoes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId, action: "bloquear_contato" })
+    });
+    const registro = await resposta.json();
+    if (!resposta.ok) throw new Error(registro.erro ?? "Nao foi possivel registrar a acao.");
+    button.textContent = "Contato bloqueado (simulacao)";
+    statusBadge.textContent = "Acao registrada";
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Tentar bloquear contato";
+    statusBadge.textContent = error.message;
   }
 }
 
