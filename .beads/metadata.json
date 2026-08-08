@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "hack2l_ajeitados",
+  "project_id": "8e273a39-8969-46d2-be4f-1612f47a3ca3"
+}
