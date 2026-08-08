@@ -50,7 +50,7 @@ async function iniciarDemo() {
 
   const eventosSelecionados = selecionarEventos(eventos, scenarioEl.value);
 
-  await rodarLote(eventosSelecionados);
+  await rodarSequencial(eventosSelecionados);
 
   rodando = false;
   startButton.disabled = false;
@@ -63,23 +63,13 @@ async function rodarSequencial(eventosSelecionados) {
       return;
     }
 
+    statusBadge.textContent = `Recebendo mensagem ${eventosSelecionados.indexOf(evento) + 1}/${eventosSelecionados.length}`;
     await esperar(evento.delayMs ?? 0);
     const mensagem = receberMensagem(evento.mensagem);
 
     renderizarMensagem(mensagem);
     await analisarHistorico();
   }
-}
-
-async function rodarLote(eventosSelecionados) {
-  for (const evento of eventosSelecionados) {
-    const mensagem = receberMensagem(evento.mensagem);
-
-    renderizarMensagem(mensagem);
-    await esperar(120);
-  }
-
-  await analisarHistorico();
 }
 
 function receberMensagem(mensagemOriginal) {
@@ -166,19 +156,14 @@ function montarBancoDeCenarios(lista) {
         timestamp: new Date().toISOString()
       })]
     },
-    "normal-audio": {
-      nome: "Audio normal: reembolso",
+    "conversa-audio-real": {
+      nome: "Conversa real: dois audios",
       tipo: "normal",
-      eventos: audio1 ? [eventoRapido({
-        ...audio1,
-        conversaId: "demo-normal-audio",
-        transcricaoSimulada: "Oi, bom dia. Quero saber se meu pedido ja saiu para entrega."
-      })] : []
-    },
-    "golpe-audio-pix": {
-      nome: "Audio risco: Pix urgente",
-      tipo: "risco",
-      eventos: audio2 ? [eventoRapido(audio2)] : []
+      eventos: [audio1, audio2].filter(Boolean).map((audio, index) => eventoRapido({
+        ...audio,
+        conversaId: "demo-conversa-audio-real",
+        id: `audio-real-${index + 1}`
+      }))
     },
     "golpe-texto-pix": {
       nome: "Texto risco: Pix urgente",
@@ -277,8 +262,10 @@ function criarPlayerAudio(src, duracao) {
   const audio = new Audio(src);
   const wrap = document.createElement("div");
   const playButton = document.createElement("button");
+  const duracaoEl = criarDuracao(duracao);
 
   wrap.className = "chat-audio";
+  audio.preload = "metadata";
   playButton.className = "play-dot";
   playButton.type = "button";
   playButton.textContent = "Play";
@@ -288,13 +275,16 @@ function criarPlayerAudio(src, duracao) {
   audio.addEventListener("ended", () => {
     playButton.textContent = "Replay";
   });
+  audio.addEventListener("loadedmetadata", () => {
+    duracaoEl.textContent = formatarDuracao(audio.duration);
+  });
   audio.addEventListener("error", () => {
     playButton.disabled = true;
     playButton.textContent = "Audio indisponivel";
     wrap.title = "O arquivo de audio desta demonstracao nao foi encontrado no servidor.";
   });
 
-  wrap.append(playButton, criarWave(), criarDuracao(duracao));
+  wrap.append(playButton, criarWave(), duracaoEl);
   return wrap;
 }
 
@@ -505,6 +495,13 @@ function criarDuracao(texto) {
   const duracao = document.createElement("small");
   duracao.textContent = texto;
   return duracao;
+}
+
+function formatarDuracao(segundos) {
+  if (!Number.isFinite(segundos)) return "Audio";
+  const minutos = Math.floor(segundos / 60);
+  const resto = Math.floor(segundos % 60).toString().padStart(2, "0");
+  return `${minutos}:${resto}`;
 }
 
 function formatarSinal(sinal) {

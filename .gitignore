@@ -150,8 +150,8 @@ activemq-data/
 # Environments
 .env
 
-# Local demo audio files
-audios/
+# Audio gerado localmente pela orientacao de voz
+data/generated/
 .envrc
 .venv
 env/

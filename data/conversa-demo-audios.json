@@ -6,8 +6,8 @@
       "conversaId": "demo-audios-whatsapp",
       "autor": "cliente",
       "tipo": "audio",
-      "audioPath": "./audios/demo-audio-1.mp4",
-      "transcricaoSimulada": "Entao voce pode me fazer o reembolso pois preciso com urgencia.",
+      "audioPath": "./audios/1.mp4",
+      "transcricaoSimulada": "Oi, mãe...",
       "timestamp": "2026-08-08T15:08:27-03:00"
     }
   },
@@ -18,8 +18,8 @@
       "conversaId": "demo-audios-whatsapp",
       "autor": "cliente",
       "tipo": "audio",
-      "audioPath": "./audios/demo-audio-2.mp4",
-      "transcricaoSimulada": "Obrigada. Por favor, faz um Pix de devolucao agora para esta chave. Nao conta para ninguem. Fico grata.",
+      "audioPath": "./audios/2.mp4",
+      "transcricaoSimulada": "Tio, acabei de...",
       "timestamp": "2026-08-08T15:08:33-03:00"
     }
   }

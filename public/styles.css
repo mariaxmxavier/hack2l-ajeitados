@@ -36,8 +36,9 @@ audio {
 
 .phone-frame {
   position: relative;
-  max-width: 430px;
-  min-height: 760px;
+  flex: 0 0 auto;
+  width: 430px;
+  height: 760px;
   padding: 18px 10px 12px;
   border: 4px solid #22262d;
   background: linear-gradient(145deg, #050607, #2a2f36 48%, #08090a);
@@ -59,7 +60,8 @@ audio {
 .phone-panel {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  min-height: 730px;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
   border: 1px solid #30363d;
   border-radius: 24px;
@@ -133,7 +135,7 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 520px;
+  min-height: 0;
   padding: 18px;
   overflow: auto;
   background:
@@ -336,6 +338,33 @@ button:disabled {
   color: #9ca3af;
   font-size: 14px;
   font-weight: 700;
+}
+
+.decision-summary {
+  margin: 0 0 12px;
+  color: #d1d5db;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.pipeline-details {
+  overflow: hidden;
+}
+
+.pipeline-details summary {
+  cursor: pointer;
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.pipeline-details pre {
+  max-height: 220px;
+  margin: 12px 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #cbd5e1;
+  font-size: 12px;
 }
 
 .meter-track {
@@ -576,8 +605,8 @@ ol li span {
 
   .phone-frame {
     justify-self: center;
-    width: 100%;
-    min-height: 700px;
+    width: 430px;
+    height: 760px;
   }
 
   .demo-controls {

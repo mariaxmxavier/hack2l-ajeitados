@@ -50,7 +50,12 @@ test("API do mockup executa a pipeline oficial e registra uma acao", async (t) =
 
   const health = await fetch(`${baseUrl}/api/health`).then((response) => response.json());
   assert.equal(health.pipeline, "antifraude");
-  const missingAudio = await fetch(`${baseUrl}/audios/demo-audio-1.mp4`);
+  const events = await fetch(`${baseUrl}/api/demo-events`).then((response) => response.json());
+  assert.equal(events[0].mensagem.audioUrl, "/audios/1.mp4");
+  const audio = await fetch(`${baseUrl}${events[0].mensagem.audioUrl}`);
+  assert.equal(audio.status, 200);
+  assert.match(audio.headers.get("content-type"), /audio\/mp4/);
+  const missingAudio = await fetch(`${baseUrl}/audios/inexistente.mp4`);
   assert.equal(missingAudio.status, 404);
 
   const response = await fetch(`${baseUrl}/api/analisar`, {
