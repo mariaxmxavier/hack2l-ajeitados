@@ -86,5 +86,7 @@ function imprimirResultadoMonitor(eventoProcessado) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await iniciarMonitorWhatsappSimulado();
+  const eventosPath = process.argv[2] ? pathToFileURL(process.argv[2]) : CAMINHO_EVENTOS_PADRAO;
+
+  await iniciarMonitorWhatsappSimulado({ eventosPath });
 }

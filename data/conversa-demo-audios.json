@@ -1,0 +1,24 @@
+[
+  {
+    "delayMs": 300,
+    "mensagem": {
+      "id": "demo-audio-001",
+      "conversaId": "demo-audios-whatsapp",
+      "autor": "cliente",
+      "tipo": "audio",
+      "audioPath": "./audios/demo-audio-1.mp4",
+      "timestamp": "2026-08-08T15:08:27-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "demo-audio-002",
+      "conversaId": "demo-audios-whatsapp",
+      "autor": "cliente",
+      "tipo": "audio",
+      "audioPath": "./audios/demo-audio-2.mp4",
+      "timestamp": "2026-08-08T15:08:33-03:00"
+    }
+  }
+]

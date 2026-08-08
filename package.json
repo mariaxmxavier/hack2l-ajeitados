@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/orquestracao.js",
     "monitor": "node src/monitor-whatsapp-simulado.js",
+    "monitor:audios": "node src/monitor-whatsapp-simulado.js ./data/conversa-demo-audios.json",
     "rag": "node --no-warnings src/rag.js",
     "fraude": "node --no-warnings src/fraude-rag.js",
     "fraude:recentes": "node --no-warnings src/fraude-rag.js --recentes",
