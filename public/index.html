@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demo Antifraude WhatsApp</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="phone-frame" aria-label="Conversa monitorada">
+        <div class="phone-speaker"></div>
+        <div class="phone-panel">
+          <header class="phone-header">
+            <span class="back-icon">&lt;</span>
+            <div class="avatar">*</div>
+            <div class="contact">
+              <h1>Numero desconhecido</h1>
+              <p>online</p>
+            </div>
+            <div class="header-icons">
+              <span>[]</span>
+              <span>tel</span>
+              <span>:</span>
+            </div>
+          </header>
+
+          <div id="messages" class="messages"></div>
+
+          <footer class="assistant-bar">
+            <span class="shield-mini">OK</span>
+            <div>
+              <strong>Assistente de Seguranca</strong>
+              <p>Protegendo voce e sua familia</p>
+            </div>
+            <span class="mic">voz</span>
+          </footer>
+        </div>
+      </section>
+
+      <aside class="risk-panel" aria-label="Analise de risco">
+        <div class="demo-controls">
+          <label class="scenario-control">
+            <span>Exemplo de entrada</span>
+            <select id="scenario">
+              <option value="aleatorio">Aleatorio</option>
+              <optgroup label="Normais">
+                <option value="normal-pedido">Texto normal: pedido</option>
+                <option value="normal-entrega">Texto normal: app oficial</option>
+                <option value="normal-audio">Audio normal: reembolso</option>
+              </optgroup>
+              <optgroup label="Risco de golpe">
+                <option value="golpe-audio-pix">Audio risco: Pix urgente</option>
+                <option value="golpe-texto-pix">Texto risco: Pix urgente</option>
+                <option value="golpe-texto-link">Texto risco: link e codigo</option>
+              </optgroup>
+            </select>
+          </label>
+          <label class="threshold-control">
+            <span>Threshold de risco</span>
+            <strong id="thresholdValue">70%</strong>
+            <input id="threshold" type="range" min="30" max="95" value="70">
+          </label>
+          <button id="startButton" type="button">Iniciar demo</button>
+          <button id="resetButton" type="button" class="secondary">Reiniciar</button>
+          <span id="statusBadge" class="status-badge">Pronto</span>
+        </div>
+
+        <div class="risk-meter">
+          <span>Risco atual</span>
+          <strong id="riskScore">0%</strong>
+          <p id="scoreBreakdown" class="score-breakdown">Aguardando saida da pipeline.</p>
+          <div class="meter-track">
+            <div id="riskBar" class="meter-fill"></div>
+          </div>
+        </div>
+
+        <div id="alertBox" class="alert-box" hidden>
+          <p class="alert-kicker">Alerta critico</p>
+          <h2>Possivel golpe detectado</h2>
+          <p>Interrompa a conversa antes de enviar dinheiro, senha, codigo SMS ou documentos.</p>
+        </div>
+
+        <div id="familyNotice" class="family-notice" hidden>
+          Familia do usuario tambem esta sendo notificada.
+        </div>
+
+        <section class="analysis-card">
+          <h2>Sinais detectados</h2>
+          <ul id="signals"></ul>
+        </section>
+
+        <section class="analysis-card">
+          <h2>Casos parecidos no RAG</h2>
+          <ol id="matches"></ol>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

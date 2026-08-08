@@ -225,13 +225,14 @@ export function calcularPontuacaoHeuristica(texto) {
   let score = 0;
 
   const regras = [
-    ["urgencia", 0.16, /\b(urgente|agora|imediatamente|hoje|24h|48h|bloquead[ao]|suspens[ao]|ultimo aviso)\b/],
+    ["urgencia", 0.16, /\b(urgente|urgencia|agora|imediatamente|hoje|24h|48h|bloquead[ao]|suspens[ao]|ultimo aviso)\b/],
     ["autoridade_impersonacao", 0.14, /\b(banco|nubank|santander|itau|caixa|receita federal|inss|mercado livre|central)\b/],
     ["dado_sensivel", 0.18, /\b(cpf|senha|codigo|sms|token|dados bancarios|cartao)\b/],
     ["link_suspeito", 0.18, /\b(bit\.ly|\.info|\.shop|\.click|\.net|http|www\.|link|clique|acesse)\b/],
     ["pedido_sigilo", 0.10, /\b(nao conta|sigilo|segredo|apaga rapido)\b/],
     ["oferta_boa_demais", 0.12, /\b(gratis|pre-aprovado|sem consulta|70%|desconto|libere ate)\b/],
-    ["pedido_pagamento", 0.16, /\b(pix|taxa|sinal|boleto|pagamento|transferencia|deposito)\b/]
+    ["pedido_pagamento", 0.16, /\b(pix|taxa|sinal|boleto|pagamento|transferencia|deposito)\b/],
+    ["pedido_reembolso", 0.12, /\b(reembolso|devolucao|devolver|estorno)\b/]
   ];
 
   for (const [nome, peso, regex] of regras) {

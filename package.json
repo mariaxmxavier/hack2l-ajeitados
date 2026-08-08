@@ -8,6 +8,7 @@
     "start:legacy": "node src/legacy/old/orquestracao.js",
     "monitor": "node src/legacy/old/monitor-whatsapp-simulado.js",
     "monitor:audios": "node src/legacy/old/monitor-whatsapp-simulado.js ./data/conversa-demo-audios.json",
+    "demo": "node src/demo-server.js",
     "rag": "node --no-warnings src/legacy/old/rag.js",
     "fraude": "node --no-warnings src/legacy/old/fraude-rag.js",
     "fraude:recentes": "node --no-warnings src/legacy/old/fraude-rag.js --recentes",

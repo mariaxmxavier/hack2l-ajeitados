@@ -14,6 +14,7 @@ export function normalizarConversaWhatsappNode(state) {
       tipo: mensagem.tipo ?? inferirTipoMensagem(mensagem),
       conteudo: mensagem.conteudo ?? "",
       audioPath: mensagem.audioPath ?? null,
+      transcricaoSimulada: mensagem.transcricaoSimulada ?? null,
       timestamp: mensagem.timestamp ?? null,
       recebidoEm: mensagem.recebidoEm ?? null
     }))
@@ -107,14 +108,24 @@ async function criarClienteElevenLabs() {
 }
 
 async function transcreverAudioDummy(client, mensagem) {
+  if (mensagem.transcricaoSimulada) {
+    return mensagem.transcricaoSimulada;
+  }
+
   if (!client || !mensagem.audioPath || !existsSync(mensagem.audioPath)) {
     return `[dummy] Transcricao simulada para ${mensagem.audioPath ?? mensagem.id}.`;
   }
 
-  const resultado = await client.speechToText.convert({
-    file: createReadStream(mensagem.audioPath),
-    modelId: DEFAULT_STT_MODEL_ID
-  });
+  let resultado;
+
+  try {
+    resultado = await client.speechToText.convert({
+      file: createReadStream(mensagem.audioPath),
+      modelId: DEFAULT_STT_MODEL_ID
+    });
+  } catch {
+    return `[dummy] Transcricao simulada para ${mensagem.audioPath ?? mensagem.id}.`;
+  }
 
   return resultado.text ?? "";
 }
