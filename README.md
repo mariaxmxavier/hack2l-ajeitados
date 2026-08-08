@@ -33,6 +33,7 @@ Ambiente inicial para processar uma conversa do WhatsApp, separar mensagens de t
 - `src/agentes.js`: concentra os nos/agentes usados pelo grafo.
 - `src/monitor-whatsapp-simulado.js`: simula monitoramento de WhatsApp com mensagens chegando ao longo do tempo.
 - `src/rag.js`: salva conversas como casos e busca os `topK=3` mais semelhantes nas ultimas 24 horas.
+- `src/fraude-rag.js`: compara mensagens com `fraude-datasets-okf/datasets/dataset_golpes.csv` e calcula score antifraude por pontuacao e RAG.
 - `.env.example`: variaveis esperadas para ElevenLabs.
 
 ## Como rodar
@@ -86,6 +87,20 @@ Agent Flow em `C:\Users\dudax\repos\agent-flow` dentro do VS Code, execute
 este arquivo. O Agent Flow aceita tanto eventos legados com `time` numerico
 quanto o contrato canonico com `timestamp` ISO.
 
+Para testar a analise antifraude contra o dataset de golpes:
+
+```bash
+npm run fraude -- "URGENTE sua conta foi bloqueada, clique no link e informe o codigo SMS"
+```
+
+Para comparar as conversas recentes salvas no RAG das ultimas 24 horas com o dataset de golpes:
+
+```bash
+npm run fraude:recentes
+```
+
+Configure `HF_TOKEN` para usar embeddings pela API da Hugging Face. Sem token, o modulo usa embedding local de fallback para manter o fluxo testavel.
+
 ## Fluxo atual
 
 1. Normaliza a conversa recebida.
@@ -94,6 +109,7 @@ quanto o contrato canonico com `timestamp` ISO.
 4. Envia as mensagens processadas para um agente dummy.
 5. Salva a conversa processada como um caso no RAG.
 6. Busca as 3 conversas mais semelhantes das ultimas 24 horas.
+7. Compara as conversas recentes com `dataset_golpes.csv` e calcula score antifraude combinando sinais de pontuacao/texto e similaridade RAG.
 
 Neste primeiro momento, se nao houver chave da ElevenLabs ou o arquivo de audio nao existir, a transcricao cai para um retorno dummy. O ponto de extensao esta em `transcreverAudioDummy`, dentro de `src/agentes.js`.
 

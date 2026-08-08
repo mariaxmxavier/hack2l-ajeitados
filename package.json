@@ -7,6 +7,8 @@
     "start": "node src/orquestracao.js",
     "monitor": "node src/monitor-whatsapp-simulado.js",
     "rag": "node --no-warnings src/rag.js",
+    "fraude": "node --no-warnings src/fraude-rag.js",
+    "fraude:recentes": "node --no-warnings src/fraude-rag.js --recentes",
     "dev": "node --watch src/orquestracao.js",
     "observability:emit": "node scripts/agent-observability/emit-event.mjs",
     "observability:read-beads": "node scripts/agent-observability/read-beads.mjs",
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.62.0",
+    "@huggingface/inference": "^4.13.25",
     "@langchain/core": "^0.3.80",
     "@langchain/langgraph": "^0.4.9",
     "dotenv": "^16.4.7"

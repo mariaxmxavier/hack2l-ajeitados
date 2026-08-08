@@ -235,3 +235,5 @@ data/*.sqlite-*
 # Temporary local Beads recovery directories
 .beads/embeddeddolt.backup.*/
 .beads/embeddeddolt.failed-bootstrap.*/
+
+.env

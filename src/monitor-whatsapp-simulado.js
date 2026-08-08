@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { analisarConversaFraude } from "./fraude-rag.js";
 import { processarConversaWhatsapp } from "./orquestracao.js";
 import { consultarRag, salvarConversaProcessadaRag } from "./rag.js";
 
@@ -32,6 +33,7 @@ export async function iniciarMonitorWhatsappSimulado({
       ?.map((entrada) => entrada.texto)
       .join("\n") ?? "";
     const rag = await consultarRag(textoConsulta, { topK: 3 });
+    const fraude = await analisarConversaFraude(resultado.resultadoAgente?.entradas ?? [], { topK: 3 });
 
     await aoProcessar({
       conversaId,
@@ -39,7 +41,8 @@ export async function iniciarMonitorWhatsappSimulado({
       totalMensagensNaConversa: conversaAtualizada.length,
       resultado: resultado.resultadoAgente,
       casoSalvo,
-      rag
+      rag,
+      fraude
     });
   }
 }
@@ -71,6 +74,14 @@ function imprimirResultadoMonitor(eventoProcessado) {
   console.log("\nTop 3 conversas semelhantes nas ultimas 24h:");
   for (const [index, caso] of eventoProcessado.rag.casos.entries()) {
     console.log(`${index + 1}. ${caso.titulo} | score=${caso.score.toFixed(4)} | mensagens=${caso.totalMensagens}`);
+  }
+
+  console.log("\nAnalise antifraude:");
+  console.log(`score final: ${eventoProcessado.fraude.scoreFinal.toFixed(4)} (${eventoProcessado.fraude.risco})`);
+  console.log(`score pontuacao: ${eventoProcessado.fraude.pontuacao.score.toFixed(4)}`);
+  console.log(`score RAG golpes: ${eventoProcessado.fraude.rag.score.toFixed(4)} | provider=${eventoProcessado.fraude.rag.provider}`);
+  for (const [index, match] of eventoProcessado.fraude.rag.matches.entries()) {
+    console.log(`${index + 1}. ${match.rotulo}/${match.categoria} | sim=${match.similaridade.toFixed(4)}`);
   }
 }
 

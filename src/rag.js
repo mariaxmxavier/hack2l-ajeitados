@@ -203,6 +203,50 @@ export async function consultarRag(
   }
 }
 
+export async function listarConversasRecentesRag(
+  { janelaHoras = JANELA_HORAS_PADRAO, dbUrl = DB_PADRAO, agora = new Date() } = {}
+) {
+  const conexao = await conectarBancoRag(dbUrl);
+
+  try {
+    return listarConversasRecentes(conexao.db, { janelaHoras, agora });
+  } finally {
+    conexao.db.close();
+  }
+}
+
+export function listarConversasRecentes(
+  db,
+  { janelaHoras = JANELA_HORAS_PADRAO, agora = new Date() } = {}
+) {
+  const inicioJanela = new Date(agora.getTime() - janelaHoras * 60 * 60 * 1000).toISOString();
+  const casos = db.prepare(`
+    SELECT
+      id,
+      conversa_id,
+      titulo,
+      conteudo,
+      metadata_json,
+      primeira_mensagem_em,
+      ultima_mensagem_em,
+      total_mensagens
+    FROM casos
+    WHERE ultima_mensagem_em >= ?
+    ORDER BY ultima_mensagem_em DESC
+  `).all(inicioJanela);
+
+  return casos.map((caso) => ({
+    id: caso.id,
+    conversaId: caso.conversa_id,
+    titulo: caso.titulo,
+    conteudo: caso.conteudo,
+    metadata: JSON.parse(caso.metadata_json),
+    primeiraMensagemEm: caso.primeira_mensagem_em,
+    ultimaMensagemEm: caso.ultima_mensagem_em,
+    totalMensagens: caso.total_mensagens
+  }));
+}
+
 export function montarConteudoConversa(mensagens) {
   return mensagens
     .map((mensagem) => {
