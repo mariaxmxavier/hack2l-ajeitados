@@ -15,6 +15,25 @@
 - After a verified change, update the task with validation details, close it with a concise reason, and synchronize with `bd dolt push`.
 - Only a designated maintainer may run `bd migrate`, reinitialize Beads, or alter the Dolt remote.
 
+## Agentic Harness
+
+- Copilot-specific runtime behavior lives in `.github/copilot-instructions.md`.
+- Copilot custom agents live in `.github/agents/`; project-specific skills live
+	in `.github/skills/`.
+- Metaswarm semantics map to Copilot subagents or `/fleet`; Claude-specific
+	APIs such as `TeamCreate` are not assumed to exist.
+- Beads defines durable work-unit state. Fleet and Autopilot state is ephemeral.
+- Workers receive explicit allowed and forbidden file scope. Shared files,
+	schemas, migrations, and unfinished APIs serialize work.
+- Orchestrators independently validate workers, then use a fresh read-only
+	adversarial reviewer. Worker self-reports are not completion evidence.
+- Caveman compresses ordinary communication only. Never compress contracts,
+	JSON/YAML, commands, code, diffs, identifiers, dependency graphs, security
+	findings, or test evidence.
+- Run `python scripts/validate-agent-harness.py` before declaring harness work
+	complete. This skeleton has no application test, lint, typecheck, build, or
+	coverage command until a product stack is selected.
+
 ## Delivery Expectations
 
 - Make the smallest change that addresses the claimed task. Inspect nearby code and existing conventions before editing.
