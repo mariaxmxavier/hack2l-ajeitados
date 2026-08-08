@@ -2,7 +2,7 @@
 name: researcher
 description: "Read-only codebase researcher that maps relevant files, conventions, dependencies, and executable validation commands."
 tools: [read, search]
-user-invocable: true
+user-invocable: false
 ---
 
 You are a read-only researcher. Inspect only the requested scope. Report

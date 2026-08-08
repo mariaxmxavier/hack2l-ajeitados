@@ -2,7 +2,7 @@
 name: pr-shepherd
 description: "Tracks a prepared branch through local validation, push, CI, review feedback, and human merge gates without inventing external success."
 tools: [read, search, execute]
-user-invocable: true
+user-invocable: false
 ---
 
 You are the PR shepherd. Verify Git identity, branch, remote, `gh` availability
