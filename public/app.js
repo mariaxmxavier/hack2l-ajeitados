@@ -14,6 +14,7 @@ const signalsEl = document.querySelector("#signals");
 const matchesEl = document.querySelector("#matches");
 const decisionSummaryEl = document.querySelector("#decisionSummary");
 const pipelineOutputEl = document.querySelector("#pipelineOutput");
+const architectureSteps = [...document.querySelectorAll("#architectureRail li")];
 
 let eventos = [];
 let historico = [];
@@ -22,6 +23,9 @@ let audioAtual = null;
 let audioOrientacao = null;
 let ultimoCenarioAleatorio = null;
 let ultimaAnalise = null;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+renderizarEstadoInicial();
 
 thresholdEl.addEventListener("input", () => {
   thresholdValueEl.textContent = `${thresholdEl.value}%`;
@@ -58,17 +62,19 @@ async function iniciarDemo() {
 }
 
 async function rodarSequencial(eventosSelecionados) {
-  for (const evento of eventosSelecionados) {
+  for (const [indice, evento] of eventosSelecionados.entries()) {
     if (!rodando) {
       return;
     }
 
-    statusBadge.textContent = `Recebendo mensagem ${eventosSelecionados.indexOf(evento) + 1}/${eventosSelecionados.length}`;
+    statusBadge.textContent = `Mensagem ${indice + 1} de ${eventosSelecionados.length}`;
     await esperar(evento.delayMs ?? 0);
     const mensagem = receberMensagem(evento.mensagem);
 
     renderizarMensagem(mensagem);
-    await analisarHistorico();
+    if (evento.analisarApos) {
+      await analisarHistorico();
+    }
   }
 }
 
@@ -87,9 +93,9 @@ async function analisarHistorico() {
   let etapaAtual = 0;
   atualizarTransicao(transicao, etapaAtual);
   const progresso = setInterval(() => {
-    etapaAtual = Math.min(etapaAtual + 1, transicao.etapas.length - 1);
+    etapaAtual = Math.min(etapaAtual + 1, architectureSteps.length - 1);
     atualizarTransicao(transicao, etapaAtual);
-  }, 800);
+  }, 520);
 
   let analise;
   try {
@@ -131,7 +137,7 @@ async function analisarHistorico() {
 
 function renderizarTransicaoAnalise() {
   const item = document.createElement("article");
-  const etapas = ["Transcrevendo áudio", "Consultando Gorilla", "Buscando no RAG", "Calculando risco"];
+  const etapas = ["Ouvindo áudio", "Verificando sinais", "Comparando casos", "Preparando orientação"];
   item.className = "pipeline-transition";
   item.innerHTML = `
     <div class="pipeline-transition-head"><span>Assistente de Segurança</span><strong>Processando</strong></div>
@@ -139,7 +145,7 @@ function renderizarTransicaoAnalise() {
     <p class="pipeline-transition-result" aria-live="polite">Preparando análise...</p>
   `;
   messagesEl.append(item);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  rolarConversa();
   return {
     item,
     etapas: [...item.querySelectorAll(".pipeline-stages li")],
@@ -148,13 +154,15 @@ function renderizarTransicaoAnalise() {
 }
 
 function atualizarTransicao(transicao, indiceAtivo) {
+  const indiceHumano = Math.min(Math.floor(indiceAtivo / 2), transicao.etapas.length - 1);
   transicao.etapas.forEach((etapa, indice) => {
-    etapa.classList.toggle("is-complete", indice < indiceAtivo);
-    etapa.classList.toggle("is-current", indice === indiceAtivo);
+    etapa.classList.toggle("is-complete", indice < indiceHumano);
+    etapa.classList.toggle("is-current", indice === indiceHumano);
   });
-  transicao.resultado.textContent = `${transicao.etapas[indiceAtivo].textContent}...`;
-  statusBadge.textContent = `Analisando ${indiceAtivo + 1}/${transicao.etapas.length}`;
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  transicao.resultado.textContent = `${transicao.etapas[indiceHumano].textContent}...`;
+  atualizarArquitetura(indiceAtivo);
+  statusBadge.textContent = `Pipeline ${indiceAtivo + 1}/${architectureSteps.length}`;
+  rolarConversa();
 }
 
 function finalizarTransicao(transicao, mensagem, estado) {
@@ -163,8 +171,19 @@ function finalizarTransicao(transicao, mensagem, estado) {
     etapa.classList.remove("is-current");
     etapa.classList.add("is-complete");
   });
+  architectureSteps.forEach((etapa) => {
+    etapa.classList.remove("is-current");
+    etapa.classList.add("is-complete");
+  });
   transicao.resultado.textContent = mensagem;
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  rolarConversa();
+}
+
+function atualizarArquitetura(indiceAtivo) {
+  architectureSteps.forEach((etapa, indice) => {
+    etapa.classList.toggle("is-complete", indice < indiceAtivo);
+    etapa.classList.toggle("is-current", indice === indiceAtivo);
+  });
 }
 
 function selecionarEventos(lista, cenario) {
@@ -184,64 +203,59 @@ function selecionarEventos(lista, cenario) {
 function montarBancoDeCenarios(lista) {
   const audio1 = lista[0]?.mensagem;
   const audio2 = lista[1]?.mensagem;
+  const agora = () => new Date().toISOString();
 
   return {
+    "audio-mae": {
+      nome: "Áudio real — conversa com a mãe",
+      tipo: "risco",
+      eventos: [
+        audio1 ? eventoRapido({ ...audio1, conversaId: "demo-audio-mae", id: "audio-mae-1" }) : null,
+        eventoRapido({ id: "audio-mae-resposta", conversaId: "demo-audio-mae", autor: "usuario", tipo: "texto", conteudo: "Oi, filho. Está tudo bem?", timestamp: agora() }),
+        eventoRapido({ id: "audio-mae-risco", conversaId: "demo-audio-mae", autor: "cliente", tipo: "texto", conteudo: "Troquei de número. Preciso que você faça um Pix agora e não conte para ninguém.", timestamp: agora() }, true)
+      ].filter(Boolean)
+    },
+    "audio-tio": {
+      nome: "Áudio real — conversa com o tio",
+      tipo: "risco",
+      eventos: [
+        audio2 ? eventoRapido({ ...audio2, conversaId: "demo-audio-tio", id: "audio-tio-1" }) : null,
+        eventoRapido({ id: "audio-tio-resposta", conversaId: "demo-audio-tio", autor: "usuario", tipo: "texto", conteudo: "Oi. Me explica com calma, por favor.", timestamp: agora() }),
+        eventoRapido({ id: "audio-tio-risco", conversaId: "demo-audio-tio", autor: "cliente", tipo: "texto", conteudo: "Estou usando outro número. Preciso de um Pix urgente para resolver isso hoje.", timestamp: agora() }, true)
+      ].filter(Boolean)
+    },
     "normal-pedido": {
       nome: "Texto normal: pedido",
       tipo: "normal",
-      eventos: [eventoRapido({
-        id: `normal-pedido-${Date.now()}`,
-        conversaId: "demo-normal-pedido",
-        autor: "cliente",
-        tipo: "texto",
-        conteudo: "Oi, bom dia. Quero saber se meu pedido ja saiu para entrega.",
-        timestamp: new Date().toISOString()
-      })]
+      eventos: [
+        eventoRapido({ id: `normal-pedido-${Date.now()}`, conversaId: "demo-normal-pedido", autor: "usuario", tipo: "texto", conteudo: "Olá! Pode me atualizar sobre meu pedido?", timestamp: agora() }),
+        eventoRapido({ id: `normal-pedido-resposta-${Date.now()}`, conversaId: "demo-normal-pedido", autor: "cliente", tipo: "texto", conteudo: "Bom dia! Seu pedido já saiu para entrega e chega até as 18h.", timestamp: agora() }, true)
+      ]
     },
     "normal-entrega": {
       nome: "Texto normal: app oficial",
       tipo: "normal",
-      eventos: [eventoRapido({
-        id: `normal-entrega-${Date.now()}`,
-        conversaId: "demo-normal-entrega",
-        autor: "cliente",
-        tipo: "texto",
-        conteudo: "Tudo certo, obrigado. Vou acompanhar pelo aplicativo oficial.",
-        timestamp: new Date().toISOString()
-      })]
-    },
-    "conversa-audio-real": {
-      nome: "Conversa real: dois audios",
-      tipo: "normal",
-      eventos: [audio1, audio2].filter(Boolean).map((audio, index) => eventoRapido({
-        ...audio,
-        conversaId: "demo-conversa-audio-real",
-        id: `audio-real-${index + 1}`
-      }))
+      eventos: [
+        eventoRapido({ id: `normal-entrega-${Date.now()}`, conversaId: "demo-normal-entrega", autor: "cliente", tipo: "texto", conteudo: "Acompanhe a entrega apenas pelo aplicativo oficial.", timestamp: agora() }),
+        eventoRapido({ id: `normal-entrega-resposta-${Date.now()}`, conversaId: "demo-normal-entrega", autor: "usuario", tipo: "texto", conteudo: "Tudo certo, obrigado. Vou acompanhar pelo app.", timestamp: agora() }, true)
+      ]
     },
     "golpe-texto-pix": {
       nome: "Texto risco: Pix urgente",
       tipo: "risco",
-      eventos: [eventoRapido({
-        id: `golpe-texto-pix-${Date.now()}`,
-        conversaId: "demo-golpe-texto-pix",
-        autor: "cliente",
-        tipo: "texto",
-        conteudo: "Oi, preciso que voce faca um Pix de devolucao agora para esta chave. Nao conta para ninguem, e urgente.",
-        timestamp: new Date().toISOString()
-      })]
+      eventos: [
+        eventoRapido({ id: `golpe-pix-abertura-${Date.now()}`, conversaId: "demo-golpe-texto-pix", autor: "usuario", tipo: "texto", conteudo: "Olá. Vi sua ligação perdida. Quem fala?", timestamp: agora() }),
+        eventoRapido({ id: `golpe-texto-pix-${Date.now()}`, conversaId: "demo-golpe-texto-pix", autor: "cliente", tipo: "texto", conteudo: "Sou do financeiro. Faça um Pix de devolução agora para esta chave. Não conte para ninguém, é urgente.", timestamp: agora() }, true)
+      ]
     },
     "golpe-texto-link": {
       nome: "Texto risco: link e codigo",
       tipo: "risco",
-      eventos: [eventoRapido({
-        id: `golpe-texto-link-${Date.now()}`,
-        conversaId: "demo-golpe-texto-link",
-        autor: "cliente",
-        tipo: "texto",
-        conteudo: "Sua conta foi bloqueada hoje. Clique neste link e informe o codigo SMS para liberar: http://verifica-conta.shop",
-        timestamp: new Date().toISOString()
-      })]
+      eventos: [
+        eventoRapido({ id: `golpe-link-abertura-${Date.now()}`, conversaId: "demo-golpe-texto-link", autor: "cliente", tipo: "texto", conteudo: "Olá. Detectamos um acesso incomum na sua conta.", timestamp: agora() }),
+        eventoRapido({ id: `golpe-link-resposta-${Date.now()}`, conversaId: "demo-golpe-texto-link", autor: "usuario", tipo: "texto", conteudo: "Como posso verificar isso com segurança?", timestamp: agora() }),
+        eventoRapido({ id: `golpe-texto-link-${Date.now()}`, conversaId: "demo-golpe-texto-link", autor: "cliente", tipo: "texto", conteudo: "Clique neste link e informe o código SMS para liberar hoje: http://verifica-conta.shop", timestamp: agora() }, true)
+      ]
     }
   };
 }
@@ -267,9 +281,10 @@ function clonarEventoRapido(evento) {
   };
 }
 
-function eventoRapido(mensagem) {
+function eventoRapido(mensagem, analisarApos = false) {
   return {
-    delayMs: 120,
+    delayMs: 420,
+    analisarApos,
     mensagem: { ...mensagem }
   };
 }
@@ -279,20 +294,27 @@ function reiniciarDemo() {
   ultimaAnalise = null;
   rodando = false;
   messagesEl.innerHTML = "";
+  renderizarEstadoInicial();
   pararAudioAtual();
   atualizarAnalise(null);
+  atualizarArquitetura(-1);
   statusBadge.textContent = "Pronto";
   startButton.disabled = false;
   scenarioEl.disabled = false;
 }
 
 function renderizarMensagem(mensagem) {
+  messagesEl.querySelector(".conversation-placeholder")?.remove();
   const item = document.createElement("article");
   item.className = `message ${mensagem.autor === "cliente" ? "incoming" : "outgoing"}`;
 
   const meta = document.createElement("span");
   meta.className = "message-meta";
-  meta.textContent = mensagem.tipo === "audio" ? "Audio recebido" : mensagem.autor;
+  meta.textContent = mensagem.autor === "usuario"
+    ? "Você"
+    : mensagem.tipo === "audio"
+      ? "Novo contato • áudio"
+      : "Novo contato";
   item.append(meta);
 
   if (mensagem.tipo === "audio") {
@@ -302,14 +324,31 @@ function renderizarMensagem(mensagem) {
     transcript.className = "transcript";
     transcript.innerHTML = `<summary>Ver transcricao analisada</summary><p>${escapeHtml(mensagem.transcricaoSimulada ?? "Audio encaminhado para transcricao.")}</p>`;
     item.append(transcript);
+    setTimeout(() => { transcript.open = true; rolarConversa(); }, 850);
   } else {
     const texto = document.createElement("p");
     texto.textContent = mensagem.conteudo;
     item.append(texto);
   }
 
+  const horario = document.createElement("time");
+  horario.className = "message-time";
+  horario.textContent = formatarHorario(mensagem.timestamp ?? mensagem.recebidoEm);
+  item.append(horario);
+
   messagesEl.append(item);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  rolarConversa();
+}
+
+function renderizarEstadoInicial() {
+  messagesEl.innerHTML = `
+    <div class="conversation-date">Hoje</div>
+    <div class="conversation-placeholder"><strong>A conversa aparecerá aqui</strong>Escolha um cenário e acompanhe a proteção em tempo real.</div>
+  `;
+}
+
+function rolarConversa() {
+  messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: reducedMotion.matches ? "auto" : "smooth" });
 }
 
 function criarPlayerAudio(src, duracao) {
@@ -377,45 +416,26 @@ function renderizarAlertaSeguranca(analise) {
       <div class="shield">!</div>
       <div>
         <h2>Alerta de Golpe</h2>
-        <p>Assistente de Seguranca <span>- Online</span></p>
+        <p>Assistente de Segurança <span>• online</span></p>
       </div>
       <strong>Risco alto</strong>
     </div>
-    <div class="voice-card">
-      <div class="bot-face">IA</div>
-      <div>
-        <h3>Orientacao por voz</h3>
-        <p>Voz gerada por IA</p>
-        <div class="voice-row">
-          <button id="voiceButton" type="button">Play</button>
-          <span class="wave"></span>
-          <small>0:15</small>
-        </div>
-      </div>
-    </div>
-    <div class="warning-card">
-      <div class="sound-icon">|||</div>
-      <p><strong>Atencao: isso pode ser golpe.</strong><br>Nao faca um novo Pix. Se o valor entrou por engano, devolva apenas pela funcao oficial do banco.</p>
-    </div>
-    <div class="reasons">
-      <h3>Por que suspeitamos:</h3>
-      <div>${motivos.map((motivo) => `<span>${formatarSinal(motivo)}</span>`).join("")}</div>
-    </div>
+    <p class="alert-summary"><strong>Isso pode ser golpe.</strong> Não envie dinheiro, senha ou código por esta conversa.</p>
+    <ul class="alert-reasons">${motivos.map((motivo) => `<li>${formatarSinal(motivo)}</li>`).join("")}</ul>
     <div class="recommended-action">
-      <div class="shield-ok">OK</div>
-      <p>Acao recomendada<br><strong>Usar 'Devolver Pix' no app do banco</strong></p>
+      <span>Ação recomendada</span>
+      <strong>Confirme tudo pelo aplicativo oficial do banco.</strong>
     </div>
     <div class="alert-actions">
-      <button type="button" id="guideButton">Tocar orientacao</button>
+      <button type="button" id="guideButton">Ouvir orientação</button>
       <button type="button" class="danger" id="blockButton">Bloquear contato</button>
     </div>
   `;
 
   messagesEl.append(alerta);
-  alerta.querySelector("#voiceButton").addEventListener("click", tocarOrientacao);
   alerta.querySelector("#guideButton").addEventListener("click", tocarOrientacao);
   alerta.querySelector("#blockButton").addEventListener("click", bloquearContato);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  rolarConversa();
 }
 
 async function tocarOrientacao(event) {
@@ -556,6 +576,12 @@ function formatarDuracao(segundos) {
   const minutos = Math.floor(segundos / 60);
   const resto = Math.floor(segundos % 60).toString().padStart(2, "0");
   return `${minutos}:${resto}`;
+}
+
+function formatarHorario(valor) {
+  const data = valor ? new Date(valor) : new Date();
+  if (Number.isNaN(data.getTime())) return "agora";
+  return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(data);
 }
 
 function formatarSinal(sinal) {

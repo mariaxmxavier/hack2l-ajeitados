@@ -3,103 +3,138 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Demo Antifraude WhatsApp</title>
+    <meta name="description" content="Demonstração local da pipeline antifraude para conversas de WhatsApp.">
+    <title>Sentinela — Demonstração Antifraude</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <main class="app-shell">
-      <section class="phone-frame" aria-label="Conversa monitorada">
-        <div class="phone-speaker"></div>
-        <div class="phone-panel">
-          <header class="phone-header">
-            <span class="back-icon">&lt;</span>
-            <div class="avatar">*</div>
-            <div class="contact">
-              <h1>Numero desconhecido</h1>
-              <p>online</p>
+    <main class="presentation-shell">
+      <header class="product-header">
+        <div class="brand-mark" aria-hidden="true"><span></span></div>
+        <div>
+          <p class="eyebrow">Pipeline antifraude em tempo real</p>
+          <h1>Sentinela <span>protege a conversa antes do prejuízo.</span></h1>
+        </div>
+        <div class="system-health"><i></i> Pipeline local online</div>
+      </header>
+
+      <div class="demo-stage">
+        <section class="phone-column" aria-label="Simulação de conversa protegida">
+          <div class="phone-label"><span>Experiência do usuário</span><strong>Conversa protegida</strong></div>
+          <div class="phone-frame">
+            <div class="phone-speaker"></div>
+            <div class="phone-panel">
+              <div class="phone-status" aria-hidden="true"><strong>11:33</strong><span>● ◒ ▰</span></div>
+              <header class="phone-header">
+                <span class="back-icon" aria-hidden="true">‹</span>
+                <div class="avatar" aria-hidden="true">?</div>
+                <div class="contact">
+                  <h2>Número desconhecido</h2>
+                  <p>número novo • online</p>
+                </div>
+                <div class="header-icons" aria-hidden="true"><span>◻</span><span>⌕</span><span>⋮</span></div>
+              </header>
+
+              <div id="messages" class="messages" role="log" aria-live="polite" aria-label="Mensagens da simulação"></div>
+
+              <footer class="assistant-bar">
+                <span class="shield-mini" aria-hidden="true"></span>
+                <div>
+                  <strong>Assistente de Segurança</strong>
+                  <p>Monitoramento ativo</p>
+                </div>
+                <span class="secure-dot" aria-hidden="true"></span>
+              </footer>
             </div>
-            <div class="header-icons">
-              <span>[]</span>
-              <span>tel</span>
-              <span>:</span>
+          </div>
+        </section>
+
+        <aside class="analysis-console" aria-label="Console de análise da pipeline">
+          <header class="console-header">
+            <div>
+              <p class="eyebrow">Demonstração antifraude</p>
+              <h2>Da mensagem à intervenção</h2>
             </div>
+            <span id="statusBadge" class="status-badge">Pronto para iniciar</span>
           </header>
 
-          <div id="messages" class="messages"></div>
-
-          <footer class="assistant-bar">
-            <span class="shield-mini">OK</span>
-            <div>
-              <strong>Assistente de Seguranca</strong>
-              <p>Protegendo voce e sua familia</p>
+          <section class="control-deck" aria-label="Controles da demonstração">
+            <label class="scenario-control">
+              <span>Cenário da conversa</span>
+              <select id="scenario">
+                <option value="audio-mae" selected>Áudio real — conversa com a mãe</option>
+                <option value="audio-tio">Áudio real — conversa com o tio</option>
+                <option value="golpe-texto-pix">Texto — Pix urgente</option>
+                <option value="golpe-texto-link">Texto — link e código</option>
+                <option value="normal-pedido">Conversa normal — pedido</option>
+                <option value="normal-entrega">Conversa normal — app oficial</option>
+              </select>
+            </label>
+            <label class="threshold-control">
+              <span>Threshold <strong id="thresholdValue">60%</strong></span>
+              <input id="threshold" type="range" min="30" max="95" value="60" aria-label="Threshold de risco">
+            </label>
+            <div class="control-actions">
+              <button id="startButton" type="button">Iniciar conversa</button>
+              <button id="resetButton" type="button" class="secondary">Reiniciar</button>
             </div>
-            <span class="mic">voz</span>
-          </footer>
-        </div>
-      </section>
+          </section>
 
-      <aside class="risk-panel" aria-label="Analise de risco">
-        <div class="demo-controls">
-          <label class="scenario-control">
-            <span>Exemplo de entrada</span>
-            <select id="scenario">
-              <option value="aleatorio">Aleatorio</option>
-              <optgroup label="Normais">
-                <option value="normal-pedido">Texto normal: pedido</option>
-                <option value="normal-entrega">Texto normal: app oficial</option>
-                <option value="conversa-audio-real">Conversa real: dois audios</option>
-              </optgroup>
-              <optgroup label="Risco de golpe">
-                <option value="golpe-texto-pix">Texto risco: Pix urgente</option>
-                <option value="golpe-texto-link">Texto risco: link e codigo</option>
-              </optgroup>
-            </select>
-          </label>
-          <label class="threshold-control">
-            <span>Threshold de risco</span>
-            <strong id="thresholdValue">70%</strong>
-            <input id="threshold" type="range" min="30" max="95" value="70">
-          </label>
-          <button id="startButton" type="button">Iniciar demo</button>
-          <button id="resetButton" type="button" class="secondary">Reiniciar</button>
-          <span id="statusBadge" class="status-badge">Pronto</span>
-        </div>
+          <section class="architecture-section" aria-labelledby="architectureTitle">
+            <div class="section-heading">
+              <div><p class="eyebrow">Arquitetura ao vivo</p><h3 id="architectureTitle">Oito etapas, uma decisão simples</h3></div>
+              <span>fluxo oficial</span>
+            </div>
+            <ol id="architectureRail" class="architecture-rail">
+              <li data-stage="0"><b>1</b><span>Conversa</span></li>
+              <li data-stage="1"><b>2</b><span>Gorilla</span></li>
+              <li data-stage="2"><b>3</b><span>response.json</span></li>
+              <li data-stage="3"><b>4</b><span>Builder OKF</span></li>
+              <li data-stage="4"><b>5</b><span>Conhecimento</span></li>
+              <li data-stage="5"><b>6</b><span>RAG + LangGraph</span></li>
+              <li data-stage="6"><b>7</b><span>Decisão</span></li>
+              <li data-stage="7"><b>8</b><span>Alerta</span></li>
+            </ol>
+          </section>
 
-        <div class="risk-meter">
-          <span>Risco atual</span>
-          <strong id="riskScore">0%</strong>
-          <p id="scoreBreakdown" class="score-breakdown">Aguardando saida da pipeline.</p>
-          <p id="decisionSummary" class="decision-summary">Decisao: aguardando analise.</p>
-          <div class="meter-track">
-            <div id="riskBar" class="meter-fill"></div>
-          </div>
-        </div>
+          <section class="result-grid" aria-label="Resultado da análise">
+            <div class="risk-meter">
+              <div class="risk-copy">
+                <span>Nível de risco</span>
+                <strong id="riskScore">0%</strong>
+              </div>
+              <div class="risk-context">
+                <p id="decisionSummary" class="decision-summary">Decisão: aguardando conversa.</p>
+                <p id="scoreBreakdown" class="score-breakdown">A pipeline ainda não foi executada.</p>
+              </div>
+              <div class="meter-track"><div id="riskBar" class="meter-fill"></div></div>
+            </div>
 
-        <div id="alertBox" class="alert-box" hidden>
-          <p class="alert-kicker">Alerta critico</p>
-          <h2>Possivel golpe detectado</h2>
-          <p>Interrompa a conversa antes de enviar dinheiro, senha, codigo SMS ou documentos.</p>
-        </div>
+            <div id="alertBox" class="intervention-banner" hidden>
+              <span aria-hidden="true">!</span>
+              <div><strong>Intervenção recomendada</strong><p>Interrompa a conversa antes de enviar dinheiro ou dados.</p></div>
+            </div>
 
-        <div id="familyNotice" class="family-notice" hidden>
-          Familia do usuario tambem esta sendo notificada.
-        </div>
+            <div id="familyNotice" class="simulation-notice" hidden>Simulação local: nenhuma mensagem externa foi enviada.</div>
 
-        <section class="analysis-card">
-          <h2>Sinais detectados</h2>
-          <ul id="signals"></ul>
-        </section>
+            <div class="evidence-grid">
+              <section class="evidence-section">
+                <div class="section-heading compact"><h3>Sinais detectados</h3><span>conversa atual</span></div>
+                <ul id="signals"><li>Aguardando mensagens.</li></ul>
+              </section>
+              <section class="evidence-section">
+                <div class="section-heading compact"><h3>Casos parecidos</h3><span>RAG unificado</span></div>
+                <ol id="matches"><li>Aguardando mensagens.</li></ol>
+              </section>
+            </div>
+          </section>
 
-        <section class="analysis-card">
-          <h2>Casos parecidos no RAG</h2>
-          <ol id="matches"></ol>
-        </section>
-
-        <details class="analysis-card pipeline-details" aria-label="Saida tecnica da pipeline">
-          <summary>Ver saida tecnica da pipeline</summary>
-          <pre id="pipelineOutput">Aguardando execucao.</pre>
-        </details>
-      </aside>
+          <details class="pipeline-details" aria-label="Saída técnica da pipeline">
+            <summary>Ver saída técnica da pipeline <span>JSON</span></summary>
+            <pre id="pipelineOutput">Aguardando execução.</pre>
+          </details>
+        </aside>
+      </div>
     </main>
 
     <script type="module" src="/app.js"></script>
