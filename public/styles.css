@@ -194,6 +194,10 @@ button.secondary { border-color: var(--line); background: transparent; color: #c
 .conversation-date { align-self: center; padding: 5px 10px; border-radius: 999px; background: #15232c; color: #8298a7; font-size: 10px; font-weight: 700; }
 .conversation-placeholder { margin: auto 20px; color: #6f8796; text-align: center; font-size: 13px; line-height: 1.5; }
 .conversation-placeholder strong { display: block; margin-bottom: 5px; color: #c2d0d8; font-size: 14px; }
+.typing-indicator { align-self: flex-start; display: flex; align-items: center; gap: 4px; width: fit-content; padding: 11px 13px; border: 1px solid #253640; border-radius: 13px 13px 13px 4px; background: #17252e; }
+.typing-indicator span { width: 5px; height: 5px; border-radius: 50%; background: #8da1ad; animation: typing-bounce 900ms infinite ease-in-out; }
+.typing-indicator span:nth-child(2) { animation-delay: 140ms; }
+.typing-indicator span:nth-child(3) { animation-delay: 280ms; }
 
 .message {
   position: relative;
@@ -206,16 +210,22 @@ button.secondary { border-color: var(--line); background: transparent; color: #c
   box-shadow: 0 8px 24px rgba(0, 5, 8, 0.2);
   animation: message-arrival 260ms ease-out both;
 }
+.message::after { position: absolute; top: 0; width: 10px; height: 10px; content: ""; background: inherit; }
 .incoming { align-self: flex-start; border-top-left-radius: 4px; border-color: #253640; background: #17252e; }
+.incoming::after { left: -5px; clip-path: polygon(100% 0, 100% 100%, 0 0); }
 .outgoing { align-self: flex-end; border-top-right-radius: 4px; border-color: #176451; background: #0f4f42; }
+.outgoing::after { right: -5px; clip-path: polygon(0 0, 0 100%, 100% 0); }
 .message-meta { display: block; margin-bottom: 5px; color: #8ca0ae; font-size: 10px; font-weight: 700; }
 .outgoing .message-meta { color: #a3d6c8; }
 .message p { margin: 0; color: #f0f4f6; font-size: 13px; line-height: 1.38; }
 .message-time { display: block; margin-top: 4px; color: #78909f; font-size: 9px; text-align: right; }
+.outgoing .message-time { display: inline-block; }
+.message-status { margin-left: 4px; color: #72d8c1; font-size: 9px; letter-spacing: -2px; }
 
 .chat-audio { min-width: 228px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; }
 .play-dot { width: 38px; height: 38px; min-height: 38px; padding: 0; border-radius: 50%; background: var(--teal); color: #05201c; font-size: 9px; }
-.wave-mini, .wave { height: 24px; border-radius: 4px; background: repeating-linear-gradient(90deg, #8ac9bc 0 2px, transparent 2px 6px); opacity: 0.8; }
+.wave-mini, .wave { display: flex; align-items: center; height: 24px; gap: 2px; border-radius: 4px; opacity: 0.8; }
+.wave-mini i { display: block; flex: 1; min-width: 1px; max-width: 3px; border-radius: 2px; background: #8ac9bc; }
 .chat-audio small { color: #8ba1ae; font-size: 10px; }
 .transcript { margin-top: 7px; color: #b8c7cf; font-size: 11px; }
 .transcript summary { cursor: pointer; color: #86aaa1; font-size: 10px; font-weight: 700; }
@@ -349,6 +359,7 @@ button.secondary { border-color: var(--line); background: transparent; color: #c
 @keyframes message-arrival { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes panel-arrival { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes stage-pulse { 50% { opacity: 0.38; } }
+@keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.45; } 30% { transform: translateY(-3px); opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

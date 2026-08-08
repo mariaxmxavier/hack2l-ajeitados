@@ -1,3 +1,5 @@
+import { buildWaveformHeights } from "/vendor/m4ss1ck-waveform.js";
+
 const messagesEl = document.querySelector("#messages");
 const startButton = document.querySelector("#startButton");
 const resetButton = document.querySelector("#resetButton");
@@ -69,6 +71,9 @@ async function rodarSequencial(eventosSelecionados) {
 
     statusBadge.textContent = `Mensagem ${indice + 1} de ${eventosSelecionados.length}`;
     await esperar(evento.delayMs ?? 0);
+    const digitando = mensagemDoContato(evento.mensagem) ? renderizarDigitando() : null;
+    if (digitando) await esperar(520);
+    digitando?.remove();
     const mensagem = receberMensagem(evento.mensagem);
 
     renderizarMensagem(mensagem);
@@ -76,6 +81,10 @@ async function rodarSequencial(eventosSelecionados) {
       await analisarHistorico();
     }
   }
+}
+
+function mensagemDoContato(mensagem) {
+  return mensagem.autor !== "usuario";
 }
 
 function receberMensagem(mensagemOriginal) {
@@ -336,8 +345,26 @@ function renderizarMensagem(mensagem) {
   horario.textContent = formatarHorario(mensagem.timestamp ?? mensagem.recebidoEm);
   item.append(horario);
 
+  if (mensagem.autor === "usuario") {
+    const status = document.createElement("span");
+    status.className = "message-status";
+    status.textContent = "✓✓";
+    status.title = "Lida";
+    item.append(status);
+  }
+
   messagesEl.append(item);
   rolarConversa();
+}
+
+function renderizarDigitando() {
+  const item = document.createElement("article");
+  item.className = "typing-indicator";
+  item.setAttribute("aria-label", "Novo contato esta digitando");
+  item.innerHTML = "<span></span><span></span><span></span>";
+  messagesEl.append(item);
+  rolarConversa();
+  return item;
 }
 
 function renderizarEstadoInicial() {
@@ -562,6 +589,12 @@ async function bloquearContato(event) {
 function criarWave() {
   const wave = document.createElement("span");
   wave.className = "wave-mini";
+  const seed = `${historico.length}-${Date.now()}`;
+  for (const height of buildWaveformHeights(seed)) {
+    const bar = document.createElement("i");
+    bar.style.height = `${height}%`;
+    wave.append(bar);
+  }
   return wave;
 }
 
