@@ -2,9 +2,11 @@
 
 ## Project State
 
-- This repository is intentionally a project skeleton. No application stack, build command, test command, or deployment target has been selected.
-- Do not invent a framework or scaffold application code. Use the `bootstrap-hackathon` prompt after the product brief and technology choices are explicit.
-- When the team adopts tooling, record the authoritative install, run, format, and test commands in the README and update this file if the workflow changes.
+- The repository contains a Node ESM LangGraph/WhatsApp pipeline and a small
+	JSONL observability bridge for the separate Agent Flow repository.
+- Record authoritative install, run, format, and test commands in the README
+	and update this file if the workflow changes. Do not merge Agent Flow into
+	this repository.
 
 ## Beads Workflow
 

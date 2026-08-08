@@ -7,7 +7,10 @@
     "start": "node src/orquestracao.js",
     "monitor": "node src/monitor-whatsapp-simulado.js",
     "rag": "node --no-warnings src/rag.js",
-    "dev": "node --watch src/orquestracao.js"
+    "dev": "node --watch src/orquestracao.js",
+    "observability:emit": "node scripts/agent-observability/emit-event.mjs",
+    "observability:read-beads": "node scripts/agent-observability/read-beads.mjs",
+    "observability:validate": "node scripts/agent-observability/validate-events.mjs"
   },
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.62.0",

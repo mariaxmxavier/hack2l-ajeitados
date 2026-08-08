@@ -37,6 +37,33 @@ npm run rag -- "cliente quer saber prazo do pedido"
 
 O RAG cria automaticamente `data/rag.sqlite` caso o banco ainda nao exista e retorna os `topK=3` casos com maior similaridade dentro das ultimas 24 horas. Cada caso e uma conversa de WhatsApp salva pelo monitor.
 
+## Observabilidade Metaswarm + Agent Flow
+
+Os dois repositorios permanecem separados. Este projeto e responsavel por
+emitir eventos e consultar o Beads; o Agent Flow observa o arquivo JSONL e
+visualiza a execucao. O contrato compartilhado esta em
+`.agent-observability/schema.json`.
+
+Para emitir uma decisao de roteamento:
+
+```bash
+npm run observability:emit -- route_decision --session session-1 --agent orchestrator-1 --target researcher-1 --role researcher --bead hack2l-ajeitados-sx6 --reason "Need codebase research"
+```
+
+Para consultar o estado normalizado do Beads e validar o log:
+
+```bash
+npm run observability:read-beads
+npm run observability:validate
+```
+
+O log `.agent-observability/events.jsonl` e gerado localmente e nao deve ser
+versionado. Para visualizar eventos em tempo real, abra o checkout separado de
+Agent Flow em `C:\Users\dudax\repos\agent-flow` dentro do VS Code, execute
+`Agent Flow: Connect to Event Source`, escolha `Watch JSONL File` e selecione
+este arquivo. O Agent Flow aceita tanto eventos legados com `time` numerico
+quanto o contrato canonico com `timestamp` ISO.
+
 ## Fluxo atual
 
 1. Normaliza a conversa recebida.
