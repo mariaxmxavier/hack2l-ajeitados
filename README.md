@@ -1,6 +1,19 @@
 # hack2l-ajeitados
 Projeto do time ajeitados para o hackaton2l 
 
+## Entrada oficial de implementação
+
+Toda implementação começa pelo orquestrador `preto-velho`: ele cria/assume o
+trabalho no Beads, planeja, delega unidades independentes e exige validação,
+revisão adversarial e evidência de PR antes da entrega. Use:
+
+```bash
+npm run preto-velho -- "descreva a implementação"
+```
+
+Isso executa `copilot --agent=preto-velho`. Iniciar o CLI sem selecionar esse
+agente pode permitir um bypass do orquestrador.
+
 ## WhatsApp LangGraph Audio Pipeline
 
 Ambiente inicial para processar uma conversa do WhatsApp, separar mensagens de texto e audio, passar os audios por uma etapa de processamento ElevenLabs e enviar tudo para um agente dummy.
