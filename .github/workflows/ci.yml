@@ -22,3 +22,9 @@ jobs:
 
       - name: Check documentation whitespace
         run: git diff --check
+
+      - name: Validate observability contract
+        run: npm run observability:validate
+
+      - name: Exercise Beads dependency DAG
+        run: python scripts/smoke-beads-dag.py
