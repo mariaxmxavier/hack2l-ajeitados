@@ -33,7 +33,7 @@ const MIME_TYPES = {
   ".wav": "audio/wav"
 };
 
-const server = createServer(async (req, res) => {
+const requestHandler = async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
@@ -67,16 +67,19 @@ const server = createServer(async (req, res) => {
   } catch (error) {
     responderErro(res, 500, error.message);
   }
-});
+};
 
 iniciarServidor(PORTA_PADRAO);
 
 function iniciarServidor(porta, tentativasRestantes = 10) {
+  const server = createServer(requestHandler);
+
   server.once("error", (error) => {
     if (error.code === "EADDRINUSE" && tentativasRestantes > 0) {
       const proximaPorta = porta + 1;
 
       console.log(`Porta ${porta} em uso. Tentando http://localhost:${proximaPorta}`);
+      server.close();
       iniciarServidor(proximaPorta, tentativasRestantes - 1);
       return;
     }
