@@ -7,8 +7,8 @@ import { dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { gerarEmbeddingLocal, listarConversasRecentesRag } from "./rag.js";
 
-const DB_FRAUDE_PADRAO = new URL("../data/fraude-rag.sqlite", import.meta.url);
-const DATASET_GOLPES_PADRAO = new URL("../fraude-datasets-okf/datasets/dataset_golpes.csv", import.meta.url);
+const DB_FRAUDE_PADRAO = new URL("../../../data/fraude-rag.sqlite", import.meta.url);
+const DATASET_GOLPES_PADRAO = new URL("../../../knowledge/reviewed/datasets/dataset_golpes.csv", import.meta.url);
 const TOP_K_PADRAO = 3;
 const HF_EMBEDDING_MODEL_PADRAO = "intfloat/multilingual-e5-small";
 

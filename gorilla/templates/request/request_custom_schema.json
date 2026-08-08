@@ -1,0 +1,15 @@
+{
+  "query": "tired of meal planning apps; meal planner alternative",
+  "since": "30d",
+  "limit": 50,
+  "custom_schema": {
+    "type": "object",
+    "properties": {
+      "pain_points": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "summary": {"type": "string"}
+    }
+  }
+}

@@ -234,6 +234,14 @@ npm-debug.log*
 # Local RAG database
 data/*.sqlite
 data/*.sqlite-*
+src/legacy/data/
+
+# Gorilla pipeline generated artifacts
+gorilla/output/
+data/index/
+
+# Generated Gorilla searches and PKF bundles
+gorilla/output/
 
 # Temporary local Beads recovery directories
 .beads/embeddeddolt.backup.*/

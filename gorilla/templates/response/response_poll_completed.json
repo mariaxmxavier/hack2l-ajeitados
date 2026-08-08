@@ -1,0 +1,34 @@
+{
+  "search_id": "7a91-example-search-id",
+  "status": "completed",
+  "query": "people looking for an AI meal planner",
+  "results": [
+    {
+      "id": "abc123",
+      "source": "reddit",
+      "channel": "MealPrepSunday",
+      "title": "Need an app that plans meals + builds the grocery list",
+      "url": "https://reddit.com/r/MealPrepSunday/example",
+      "author": "u/example",
+      "body_snippet": "Example result text.",
+      "score": 142,
+      "num_comments": 28,
+      "created_utc": 1716480000,
+      "result_score": 0.94,
+      "validation_score": 0.81,
+      "matched_signals": ["first_person_demand"],
+      "tier": "hot",
+      "archetype": "acute_pain",
+      "archetype_confidence": 0.72,
+      "metadata": {}
+    }
+  ],
+  "total": 1,
+  "buckets": {"hot": 1, "warm": 0, "cold": 0},
+  "done_sources": ["reddit", "twitter", "bluesky", "linkedin", "youtube"],
+  "people": [],
+  "communities": [],
+  "errors": {},
+  "credits_charged": 1,
+  "credits_remaining": 99
+}

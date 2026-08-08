@@ -1,0 +1,6 @@
+{
+  "search_id": "7a91-example-search-id",
+  "status": "running",
+  "requested_sources": ["reddit", "twitter", "bluesky", "linkedin", "youtube"],
+  "suggested_interval_ms": 1500
+}

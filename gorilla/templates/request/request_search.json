@@ -1,0 +1,11 @@
+{
+  "query": "people looking for an AI meal planner",
+  "mode": "ranked",
+  "since": "7d",
+  "limit": 50,
+  "sources": ["reddit", "twitter", "bluesky", "linkedin", "youtube"],
+  "channels": {
+    "reddit": ["MealPrepSunday"],
+    "twitter": ["sarahbuilds"]
+  }
+}

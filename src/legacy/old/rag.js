@@ -5,7 +5,7 @@ import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-const DB_PADRAO = new URL("../data/rag.sqlite", import.meta.url);
+const DB_PADRAO = new URL("../../../data/rag.sqlite", import.meta.url);
 const DIMENSOES_EMBEDDING = 128;
 const TOP_K_PADRAO = 3;
 const JANELA_HORAS_PADRAO = 24;

@@ -1,0 +1,18 @@
+{
+  "search_id": "7a91-example-search-id",
+  "status": "running",
+  "query": "people looking for an AI meal planner",
+  "requested_sources": ["reddit", "twitter", "bluesky", "linkedin", "youtube"],
+  "done_sources": ["reddit", "twitter"],
+  "pending_sources": ["bluesky", "linkedin", "youtube"],
+  "results": [],
+  "total": 0,
+  "buckets": {"hot": 0, "warm": 0, "cold": 0},
+  "people": [],
+  "communities": [],
+  "errors": {},
+  "credits_charged": null,
+  "credits_remaining": null,
+  "started_at": "2026-08-08T12:00:00Z",
+  "completed_at": null
+}

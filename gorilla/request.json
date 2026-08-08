@@ -1,0 +1,10 @@
+{
+  "query": "Conversas em português do Brasil sobre golpes ou fraudes em pagamentos digitais: Pix, TED, boleto, cartão, carteira digital, link de pagamento, cripto, empréstimos ou benefícios. Inclua tentativas, suspeitas, alertas e casos consumados; priorize primeiro contato, identidade alegada, pedido, persuasão, sinais de desconfiança, valor, canal e desfecho (estorno, MED, contestação, BO ou perda). Inclua variantes novas e links originais.",
+  "mode": "ranked",
+  "since": "30d",
+  "limit": 200,
+  "sources": [
+    "reddit",
+    "twitter"
+  ]
+}

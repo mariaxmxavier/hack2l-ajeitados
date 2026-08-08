@@ -1,0 +1,7 @@
+{
+  "plan": "free",
+  "balance": {"tier": 0, "pack": 0, "overage": 0, "total": 100},
+  "has_api_keys": true,
+  "stripe_customer_id": null,
+  "stripe_subscription_id": null
+}

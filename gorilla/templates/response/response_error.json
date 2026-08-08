@@ -1,0 +1,6 @@
+{
+  "error": "Example error message",
+  "code": "invalid_param",
+  "balance": 0,
+  "required": 1
+}

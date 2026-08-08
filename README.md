@@ -29,11 +29,10 @@ Ambiente inicial para processar uma conversa do WhatsApp, separar mensagens de t
 
 ## Estrutura
 
-- `src/orquestracao.js`: monta o grafo LangGraph e define a ordem do processo.
-- `src/agentes.js`: concentra os nos/agentes usados pelo grafo.
-- `src/monitor-whatsapp-simulado.js`: simula monitoramento de WhatsApp com mensagens chegando ao longo do tempo.
-- `src/rag.js`: salva conversas como casos e busca os `topK=3` mais semelhantes nas ultimas 24 horas.
-- `src/fraude-rag.js`: compara mensagens com `fraude-datasets-okf/datasets/dataset_golpes.csv` e calcula score antifraude por pontuacao e RAG.
+- `src/pipeline/antifraude.js`: pipeline oficial ponta a ponta.
+- `src/knowledge/index.js`: parser OKF e índice unificado SQLite/FTS5.
+- `src/integrations/gorilla-process.js`: integração com o pipeline Gorilla Python.
+- `src/legacy/old/`: fluxo inicial de WhatsApp e RAG mantido para compatibilidade.
 - `.env.example`: variaveis esperadas para ElevenLabs.
 
 ## Como rodar
@@ -43,6 +42,10 @@ npm install
 copy .env.example .env
 npm start
 ```
+
+`npm start` executa a pipeline antifraude completa. Os comandos históricos
+continuam disponíveis como `npm run start:legacy`, `npm run monitor`, `npm run
+rag` e `npm run fraude`.
 
 Para simular um monitoramento de WhatsApp, rode:
 
@@ -59,6 +62,26 @@ npm run rag -- "cliente quer saber prazo do pedido"
 ```
 
 O RAG cria automaticamente `data/rag.sqlite` caso o banco ainda nao exista e retorna os `topK=3` casos com maior similaridade dentro das ultimas 24 horas. Cada caso e uma conversa de WhatsApp salva pelo monitor.
+
+## Pipeline antifraude ponta a ponta
+
+O fluxo integrado executa o LangGraph de WhatsApp, chama o pipeline Gorilla
+Python em modo offline, transforma a resposta em documentos OKF/PKF, indexa a
+base revisada e recupera evidencias no SQLite/FTS5. O resultado inclui risco,
+proveniencia e a recomendacao `pausar` ou `escalar`.
+
+```bash
+npm run pipeline:offline
+```
+
+Por padrao, a execucao usa `gorilla/templates/response/response_poll_completed.json`
+como fixture e nao consome a API. Para uma chamada real, defina `GORILLA_OFFLINE=0`
+e configure `GORILLA_API_KEY`; para manter os
+artefatos temporarios durante uma depuracao, use `PIPELINE_KEEP_ARTIFACTS=1`.
+
+O indice unificado fica em `data/index/knowledge.sqlite` e usa os namespaces
+`reviewed`, `conversation:<id>` e `dynamic:<run_id>`. O namespace dinamico e
+removido no final da execucao.
 
 ## Observabilidade Metaswarm + Agent Flow
 
@@ -111,7 +134,7 @@ Configure `HF_TOKEN` para usar embeddings pela API da Hugging Face. Sem token, o
 6. Busca as 3 conversas mais semelhantes das ultimas 24 horas.
 7. Compara as conversas recentes com `dataset_golpes.csv` e calcula score antifraude combinando sinais de pontuacao/texto e similaridade RAG.
 
-Neste primeiro momento, se nao houver chave da ElevenLabs ou o arquivo de audio nao existir, a transcricao cai para um retorno dummy. O ponto de extensao esta em `transcreverAudioDummy`, dentro de `src/agentes.js`.
+Neste primeiro momento, se nao houver chave da ElevenLabs ou o arquivo de audio nao existir, a transcricao cai para um retorno dummy. O ponto de extensao legado esta em `src/legacy/old/agentes.js`.
 
 ## Formato do evento monitorado
 
