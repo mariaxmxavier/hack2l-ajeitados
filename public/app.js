@@ -83,7 +83,13 @@ function receberMensagem(mensagemOriginal) {
 }
 
 async function analisarHistorico() {
-  statusBadge.textContent = "Analisando";
+  const transicao = renderizarTransicaoAnalise();
+  let etapaAtual = 0;
+  atualizarTransicao(transicao, etapaAtual);
+  const progresso = setInterval(() => {
+    etapaAtual = Math.min(etapaAtual + 1, transicao.etapas.length - 1);
+    atualizarTransicao(transicao, etapaAtual);
+  }, 800);
 
   let analise;
   try {
@@ -98,19 +104,67 @@ async function analisarHistorico() {
     analise = await resposta.json();
     if (!resposta.ok) throw new Error(analise.erro ?? "Falha ao executar a pipeline.");
   } catch (error) {
+    clearInterval(progresso);
+    finalizarTransicao(transicao, "Falha ao analisar a mensagem.", "error");
     statusBadge.textContent = "Falha na analise";
     scoreBreakdown.textContent = error.message;
     return;
   }
+  clearInterval(progresso);
 
   ultimaAnalise = analise;
   atualizarAnalise(analise);
+  const alertaAtivo = Boolean(analise.notificacoes.length);
+  finalizarTransicao(
+    transicao,
+    alertaAtivo ? "Alerta enviado — interrompa a conversa." : "Análise concluída — monitoramento ativo.",
+    alertaAtivo ? "alert" : "success"
+  );
+  await esperar(280);
 
-  if (analise.notificacoes.length && !document.querySelector(".security-alert-message")) {
+  if (alertaAtivo && !document.querySelector(".security-alert-message")) {
     renderizarAlertaSeguranca(analise);
   }
 
-  statusBadge.textContent = analise.notificacoes.length ? "Alerta enviado" : "Analise concluida";
+  statusBadge.textContent = alertaAtivo ? "Alerta enviado" : "Analise concluida";
+}
+
+function renderizarTransicaoAnalise() {
+  const item = document.createElement("article");
+  const etapas = ["Transcrevendo áudio", "Consultando Gorilla", "Buscando no RAG", "Calculando risco"];
+  item.className = "pipeline-transition";
+  item.innerHTML = `
+    <div class="pipeline-transition-head"><span>Assistente de Segurança</span><strong>Processando</strong></div>
+    <ol class="pipeline-stages">${etapas.map((etapa) => `<li>${etapa}</li>`).join("")}</ol>
+    <p class="pipeline-transition-result" aria-live="polite">Preparando análise...</p>
+  `;
+  messagesEl.append(item);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return {
+    item,
+    etapas: [...item.querySelectorAll(".pipeline-stages li")],
+    resultado: item.querySelector(".pipeline-transition-result")
+  };
+}
+
+function atualizarTransicao(transicao, indiceAtivo) {
+  transicao.etapas.forEach((etapa, indice) => {
+    etapa.classList.toggle("is-complete", indice < indiceAtivo);
+    etapa.classList.toggle("is-current", indice === indiceAtivo);
+  });
+  transicao.resultado.textContent = `${transicao.etapas[indiceAtivo].textContent}...`;
+  statusBadge.textContent = `Analisando ${indiceAtivo + 1}/${transicao.etapas.length}`;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function finalizarTransicao(transicao, mensagem, estado) {
+  transicao.item.classList.add(`is-${estado}`);
+  transicao.etapas.forEach((etapa) => {
+    etapa.classList.remove("is-current");
+    etapa.classList.add("is-complete");
+  });
+  transicao.resultado.textContent = mensagem;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 function selecionarEventos(lista, cenario) {
