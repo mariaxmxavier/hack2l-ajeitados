@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [{ "type": "command", "command": "node scripts/agent-observability/copilot-hook.mjs", "env": { "COPILOT_HOOK_EVENT": "session_start" } }],
+    "subagentStart": [{ "type": "command", "command": "node scripts/agent-observability/copilot-hook.mjs", "env": { "COPILOT_HOOK_EVENT": "agent_spawn" } }],
+    "subagentStop": [{ "type": "command", "command": "node scripts/agent-observability/copilot-hook.mjs", "env": { "COPILOT_HOOK_EVENT": "agent_complete" } }],
+    "postToolUse": [{ "type": "command", "command": "node scripts/agent-observability/copilot-hook.mjs", "env": { "COPILOT_HOOK_EVENT": "tool_end" } }],
+    "sessionEnd": [{ "type": "command", "command": "node scripts/agent-observability/copilot-hook.mjs", "env": { "COPILOT_HOOK_EVENT": "session_end" } }]
+  }
+}
