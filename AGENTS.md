@@ -43,6 +43,20 @@
 - The configured Beads policy is `team-maintainer`: agents may close tasks, synchronize Beads, commit, and push after successful validation when no direct instruction prohibits it and local Git identity/authentication are configured.
 - Report the task ID, changed files, validation, and synchronization status at handoff.
 
+## Codex routing
+
+- When this repository is open in Codex, implementation requests are handled
+  by the `preto-velho` orchestration role. It runs on `gpt-5.6-terra` and
+  delegates only scoped workers.
+- Project workers default to `gpt-5.6-luna`: `executor`, `researcher`,
+  `validator`, and `adversarial-reviewer`. They are internal roles, not
+  user-facing commands.
+- The project configuration is `.codex/config.toml` and the role definitions
+  are `.codex/agents/*.toml`. Codex must trust the repository's `.codex` layer
+  for these settings to load. The Codex UI still presents custom agents as
+  delegatable roles; it does not replace the compose box with a permanent
+  custom-agent dropdown.
+
 ## Canonical entrypoint
 
 - Use `npm run preto-velho -- "request"` (ou `copilot --agent=preto-velho`) para
