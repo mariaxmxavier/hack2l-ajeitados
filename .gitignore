@@ -222,3 +222,15 @@ __marimo__/
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Local RAG database
+data/*.sqlite
+data/*.sqlite-*
+
+# Temporary local Beads recovery directories
+.beads/embeddeddolt.backup.*/
+.beads/embeddeddolt.failed-bootstrap.*/

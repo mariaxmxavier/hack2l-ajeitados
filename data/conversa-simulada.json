@@ -1,0 +1,90 @@
+[
+  {
+    "delayMs": 300,
+    "mensagem": {
+      "id": "wa-001",
+      "conversaId": "cliente-joao",
+      "autor": "cliente",
+      "tipo": "texto",
+      "conteudo": "Oi, bom dia. Voces conseguem me ajudar com meu pedido?",
+      "timestamp": "2026-08-08T10:00:00-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "wa-101",
+      "conversaId": "cliente-maria",
+      "autor": "cliente",
+      "tipo": "texto",
+      "conteudo": "Preciso trocar um produto que chegou com defeito.",
+      "timestamp": "2026-08-08T10:00:04-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "wa-002",
+      "conversaId": "cliente-joao",
+      "autor": "cliente",
+      "tipo": "audio",
+      "audioPath": "./audios/audio-exemplo.mp3",
+      "timestamp": "2026-08-08T10:00:08-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "wa-201",
+      "conversaId": "cliente-carlos",
+      "autor": "cliente",
+      "tipo": "texto",
+      "conteudo": "Quero a segunda via do boleto do meu pedido.",
+      "timestamp": "2026-08-08T10:00:12-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "wa-003",
+      "conversaId": "cliente-joao",
+      "autor": "atendente",
+      "tipo": "texto",
+      "conteudo": "Claro. Pode me mandar o numero do pedido?",
+      "timestamp": "2026-08-08T10:00:20-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "wa-102",
+      "conversaId": "cliente-maria",
+      "autor": "atendente",
+      "tipo": "texto",
+      "conteudo": "Voce pode informar a data da compra e enviar uma foto do defeito?",
+      "timestamp": "2026-08-08T10:00:27-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "wa-004",
+      "conversaId": "cliente-joao",
+      "autor": "cliente",
+      "tipo": "texto",
+      "conteudo": "Pedido 48391.",
+      "timestamp": "2026-08-08T10:00:31-03:00"
+    }
+  },
+  {
+    "delayMs": 500,
+    "mensagem": {
+      "id": "wa-202",
+      "conversaId": "cliente-carlos",
+      "autor": "atendente",
+      "tipo": "texto",
+      "conteudo": "Claro. Me confirme o CPF ou CNPJ usado na compra.",
+      "timestamp": "2026-08-08T10:00:36-03:00"
+    }
+  }
+]
