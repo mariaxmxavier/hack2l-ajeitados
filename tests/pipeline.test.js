@@ -50,6 +50,8 @@ test("API do mockup executa a pipeline oficial e registra uma acao", async (t) =
 
   const health = await fetch(`${baseUrl}/api/health`).then((response) => response.json());
   assert.equal(health.pipeline, "antifraude");
+  const missingAudio = await fetch(`${baseUrl}/audios/demo-audio-1.mp4`);
+  assert.equal(missingAudio.status, 404);
 
   const response = await fetch(`${baseUrl}/api/analisar`, {
     method: "POST",

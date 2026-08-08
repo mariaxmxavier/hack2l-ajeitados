@@ -243,8 +243,9 @@ async function readableStreamToBuffer(stream) {
 function servirArquivo(res, baseDir, arquivoRelativo) {
   const caminho = resolve(baseDir, arquivoRelativo);
   if (!caminho.startsWith(`${baseDir}\\`) && caminho !== baseDir) return responderErro(res, 403, "Acesso negado.");
+  if (!existsSync(caminho)) return responderErro(res, 404, "Arquivo nao encontrado.");
   res.writeHead(200, { "Content-Type": MIME_TYPES[extname(caminho).toLowerCase()] ?? "application/octet-stream" });
-  createReadStream(caminho).on("error", () => responderErro(res, 404, "Arquivo nao encontrado.")).pipe(res);
+  createReadStream(caminho).on("error", () => responderErro(res, 500, "Nao foi possivel ler o arquivo.")).pipe(res);
 }
 
 function lerJson(req) {

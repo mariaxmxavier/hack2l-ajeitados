@@ -288,6 +288,11 @@ function criarPlayerAudio(src, duracao) {
   audio.addEventListener("ended", () => {
     playButton.textContent = "Replay";
   });
+  audio.addEventListener("error", () => {
+    playButton.disabled = true;
+    playButton.textContent = "Audio indisponivel";
+    wrap.title = "O arquivo de audio desta demonstracao nao foi encontrado no servidor.";
+  });
 
   wrap.append(playButton, criarWave(), criarDuracao(duracao));
   return wrap;
