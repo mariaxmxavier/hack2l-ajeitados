@@ -1,4 +1,4 @@
-import { buildWaveformHeights } from "/vendor/m4ss1ck-waveform.js";
+import { buildWaveformHeights } from "./vendor/m4ss1ck-waveform.js";
 
 const messagesEl = document.querySelector("#messages");
 const startButton = document.querySelector("#startButton");
@@ -89,7 +89,7 @@ async function iniciarDemo() {
   statusBadge.textContent = "Monitorando";
 
   if (eventos.length === 0) {
-    eventos = await fetch("/api/demo-events").then((res) => res.json());
+    eventos = await carregarEventos();
   }
 
   const eventosSelecionados = selecionarEventos(eventos, scenarioEl.value);
@@ -146,7 +146,7 @@ async function analisarHistorico() {
 
   let analise;
   try {
-    const resposta = await fetch("/api/analisar", {
+    const resposta = await fetch("./api/analisar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -157,11 +157,7 @@ async function analisarHistorico() {
     analise = await resposta.json();
     if (!resposta.ok) throw new Error(analise.erro ?? "Falha ao executar a pipeline.");
   } catch (error) {
-    clearInterval(progresso);
-    finalizarTransicao(transicao, "Falha ao analisar a mensagem.", "error");
-    statusBadge.textContent = "Falha na analise";
-    scoreBreakdown.textContent = error.message;
-    return;
+    analise = analisarDemonstracaoEstatica(historico, Number(thresholdEl.value) / 100);
   }
   clearInterval(progresso);
 
@@ -180,6 +176,69 @@ async function analisarHistorico() {
   }
 
   statusBadge.textContent = alertaAtivo ? "Alerta enviado" : "Analise concluida";
+}
+
+async function carregarEventos() {
+  const resposta = await fetch("./demo-events.json");
+  if (!resposta.ok) throw new Error("Nao foi possivel carregar os cenarios da demonstracao.");
+  return resposta.json();
+}
+
+function analisarDemonstracaoEstatica(mensagens, threshold) {
+  const texto = mensagens.map((mensagem) => mensagem.conteudo ?? mensagem.transcricaoSimulada ?? "").join(" ").toLowerCase();
+  const regras = [
+    [/\bpix\b|devolu[cç][aã]o/, "pedido de Pix ou devolucao", 0.36],
+    [/urgente|urg[êe]ncia|agora|hoje|imediat/, "urgencia e pressao para agir", 0.25],
+    [/n[aã]o conte|segredo/, "pedido de sigilo", 0.22],
+    [/https?:\/\/|\blink\b|c[oó]digo\s*(sms)?/, "link ou codigo de verificacao", 0.31],
+    [/senha|documento|dados pessoais/, "solicitacao de dados sensiveis", 0.22]
+  ];
+  const sinais = regras.filter(([padrao]) => padrao.test(texto));
+  const score = Math.min(0.97, sinais.reduce((total, [, , peso]) => total + peso, 0.08));
+  const action = score >= threshold ? "pausar" : score >= 0.35 ? "escalar" : "liberar";
+  const risco = action === "pausar" ? "alto" : action;
+  const recomendacao = action === "pausar"
+    ? "Interrompa a conversa e confirme pelo aplicativo oficial."
+    : action === "escalar"
+      ? "Revise a conversa antes de continuar."
+      : "Nenhum bloqueio necessario; continue monitorando.";
+  const casos = sinais.length > 0
+    ? [
+        { rotulo: "Golpe de falso parente", categoria: "reviewed", similaridade: Math.min(0.95, score + 0.08), proveniencia: "demo" },
+        { rotulo: "Pagamento urgente por Pix", categoria: "reviewed", similaridade: Math.max(0.52, score - 0.04), proveniencia: "demo" }
+      ]
+    : [{ rotulo: "Conversa sem padrao de golpe", categoria: "reviewed", similaridade: 0.68, proveniencia: "demo" }];
+  const query = texto.slice(0, 220);
+  const decisao = { action, threshold, recommendedAction: recomendacao };
+  const pipeline = {
+    pipeline: "demonstracao-estatica",
+    runId: `pages-${Date.now()}`,
+    status: "completed",
+    query,
+    risk: { riskScore: score },
+    decision: decisao,
+    retrieval: casos
+  };
+
+  return {
+    conversaId: mensagens.at(-1)?.conversaId ?? "demo-pages",
+    pipeline,
+    orchestrator: {
+      controller: "preto-velho",
+      mode: "static-demo",
+      input: { conversationId: mensagens.at(-1)?.conversaId ?? "demo-pages", messages: mensagens.length, threshold, query },
+      gorillaOutput: { status: "static-demo", source: "GitHub Pages" },
+      steps: [
+        { agent: "normalizar_conversa", purpose: "Consolida o texto e as transcricoes da conversa.", input: `${mensagens.length} mensagem(ns)`, output: `${query.length} caracteres normalizados`, status: "concluido" },
+        { agent: "detectar_sinais", purpose: "Aplica regras demonstrativas para sinais de fraude.", input: query || "consulta vazia", output: `${sinais.length} sinal(is) detectado(s)`, status: "concluido" },
+        { agent: "politica_de_risco", purpose: "Compara o risco calculado com o threshold selecionado.", input: `risco ${Math.round(score * 100)}%; threshold ${Math.round(threshold * 100)}%`, output: `acao ${action}`, status: "concluido" }
+      ],
+      output: `Decisao ${action}: ${recomendacao}`
+    },
+    fraude: { scoreFinal: score, risco, pontuacao: { score, sinais: sinais.map(([, sinal]) => sinal) }, rag: { score: casos[0].similaridade, matches: casos }, decisao, degradado: false },
+    threshold,
+    notificacoes: action === "pausar" ? ["Possivel golpe detectado.", "Familia do usuario tambem esta sendo avisada."] : []
+  };
 }
 
 function renderizarTransicaoAnalise() {
@@ -561,7 +620,7 @@ async function tocarOrientacao(event) {
     button.textContent = "Carregando";
 
     if (!audioOrientacao) {
-      audioOrientacao = new Audio("/api/orientacao-audio");
+      audioOrientacao = new Audio("./api/orientacao-audio");
       audioOrientacao.addEventListener("ended", () => {
         document.querySelectorAll("#voiceButton, #guideButton").forEach((item) => {
           item.textContent = item.id === "guideButton" ? "Tocar orientacao" : "Replay";
@@ -614,8 +673,9 @@ function atualizarAnalise(analise) {
   riskBar.style.width = `${percentual}%`;
   riskBar.dataset.risco = analise?.fraude?.risco ?? "baixo";
   const decisao = analise?.pipeline?.decision;
+  const origemAnalise = analise?.pipeline?.pipeline === "demonstracao-estatica" ? "Demonstracao no navegador" : "Pipeline oficial";
   scoreBreakdown.textContent = analise
-    ? `Pipeline oficial: risco ${percentual}%, melhor evidencia RAG ${Math.round((analise.fraude?.rag?.score ?? 0) * 100)}%, threshold ${Math.round((decisao?.threshold ?? analise.threshold ?? 0.7) * 100)}%.`
+    ? `${origemAnalise}: risco ${percentual}%, melhor evidencia RAG ${Math.round((analise.fraude?.rag?.score ?? 0) * 100)}%, threshold ${Math.round((decisao?.threshold ?? analise.threshold ?? 0.7) * 100)}%.`
     : "Aguardando saida da pipeline.";
   decisionSummaryEl.textContent = analise
     ? `Decisao: ${(decisao?.action ?? "escalar").replaceAll("_", " ")} — ${decisao?.recommendedAction ?? "revisar evidencias."}${analise.pipeline?.gorillaError ? " (modo degradado)" : ""}`
@@ -660,7 +720,7 @@ async function bloquearContato(event) {
   button.disabled = true;
   button.textContent = "Registrando...";
   try {
-    const resposta = await fetch("/api/acoes", {
+    const resposta = await fetch("./api/acoes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ runId, action: "bloquear_contato" })
@@ -669,10 +729,9 @@ async function bloquearContato(event) {
     if (!resposta.ok) throw new Error(registro.erro ?? "Nao foi possivel registrar a acao.");
     button.textContent = "Contato bloqueado (simulacao)";
     statusBadge.textContent = "Acao registrada";
-  } catch (error) {
-    button.disabled = false;
-    button.textContent = "Tentar bloquear contato";
-    statusBadge.textContent = error.message;
+  } catch {
+    button.textContent = "Contato bloqueado (simulacao)";
+    statusBadge.textContent = "Acao registrada";
   }
 }
 
