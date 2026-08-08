@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseOkf, openKnowledgeIndex, retrieve, toDocument, upsertDocuments } from "../src/knowledge/index.js";
@@ -39,6 +39,37 @@ test("pipeline offline executa Gorilla, RAG e decisão", async () => {
   assert.ok(["pausar", "escalar"].includes(result.decision.action));
   const bundlePath = result.gorilla.bundlePath;
   assert.equal(await fileExists(bundlePath), false, "artefato temporário deve ser removido");
+});
+
+test("fixture Gorilla gera investigação agentica auditável antes do OKF", async () => {
+  const root = await mkdtemp(join(tmpdir(), "ajeitados-agentic-"));
+  const result = await executarPipelineAntifraude([
+    { id: "agentic-1", conversaId: "agentic", autor: "cliente", tipo: "texto", conteudo: "Recebi um pedido urgente de Pix.", timestamp: new Date().toISOString() }
+  ], {
+    dbPath: join(root, "index.sqlite"),
+    reviewedRoots: [],
+    runId: "agentic-run",
+    keepArtifacts: true
+  });
+  try {
+    const bundlePath = result.gorilla.bundlePath;
+    const state = JSON.parse(await readFile(join(bundlePath, "state.json"), "utf8"));
+    const manifest = JSON.parse(await readFile(join(bundlePath, "okf.json"), "utf8"));
+    const roleNames = state.agent_results.map((item) => item.agent);
+
+    assert.equal(state.schema_version, "1.0");
+    assert.match(state.raw_response_sha256, /^[a-f0-9]{64}$/);
+    assert.equal(state.raw_response_json, JSON.stringify(JSON.parse(state.raw_response_json)));
+    assert.deepEqual(roleNames, ["research", "entity", "pattern", "replication", "validation", "judge"]);
+    assert.equal(state.checkpoints.length, 6);
+    assert.equal(state.entities[0]?.type, "url");
+    assert.equal(state.entities[0]?.evidence_id, "ev_001");
+    assert.ok(state.audit_events.some((event) => event.event === "investigation_started" && event.agent === "preto-velho"));
+    assert.equal(manifest.agentic_investigation.orchestrator, "preto-velho");
+    assert.equal(manifest.quality_gate.status, "passed");
+  } finally {
+    await rm(result.gorilla?.workDir, { recursive: true, force: true });
+  }
 });
 
 test("API do mockup executa a pipeline oficial e registra uma acao", async (t) => {
