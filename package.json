@@ -10,7 +10,8 @@
     "dev": "node --watch src/orquestracao.js",
     "observability:emit": "node scripts/agent-observability/emit-event.mjs",
     "observability:read-beads": "node scripts/agent-observability/read-beads.mjs",
-    "observability:validate": "node scripts/agent-observability/validate-events.mjs"
+    "observability:validate": "node scripts/agent-observability/validate-events.mjs",
+    "preto-velho": "node scripts/preto-velho/launch.mjs"
   },
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.62.0",

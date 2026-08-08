@@ -42,3 +42,12 @@
 - Discover and run the project's actual validation commands. Do not claim a validation command exists until it has been added and checked.
 - The configured Beads policy is `team-maintainer`: agents may close tasks, synchronize Beads, commit, and push after successful validation when no direct instruction prohibits it and local Git identity/authentication are configured.
 - Report the task ID, changed files, validation, and synchronization status at handoff.
+
+## Canonical entrypoint
+
+- Use `npm run preto-velho -- "request"` (ou `copilot --agent=preto-velho`) para
+  implementação. `preto-velho` é o único agente customizado público; os demais
+  perfis são workers internos.
+- O orquestrador cria/assume Beads, despacha apenas unidades prontas e
+  isoladas, valida independentemente, obtém revisão adversarial e acompanha o
+  branch até PR/CI antes de fechar o épico.

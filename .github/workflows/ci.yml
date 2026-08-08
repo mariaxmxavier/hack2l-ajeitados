@@ -22,3 +22,15 @@ jobs:
 
       - name: Check documentation whitespace
         run: git diff --check
+
+      - name: Validate observability contract
+        run: npm run observability:validate
+
+      - name: Exercise Beads dependency DAG
+        shell: bash
+        run: |
+          if command -v bd >/dev/null 2>&1; then
+            python scripts/smoke-beads-dag.py
+          else
+            echo "SKIP: bd CLI is not installed in this runner; local canary remains required."
+          fi

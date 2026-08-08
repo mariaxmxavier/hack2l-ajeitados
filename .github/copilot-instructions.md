@@ -3,6 +3,32 @@
 Use Metaswarm semantics with Copilot-native execution. Do not emulate Claude
 `TeamCreate` or treat Fleet state as durable work state.
 
+## Canonical Entry Point
+
+Repository implementation work is orchestrated through the public
+`preto-velho` custom agent. Invoke it with `npm run preto-velho` (or
+`copilot --agent=preto-velho` when the launcher is unavailable). Direct worker
+invocation is reserved for the orchestrator; internal worker profiles and
+project skills are model-invocable only and must remain hidden from user-facing
+agent/skill menus (`user-invocable: false`).
+
+The orchestrator must create or select a Beads epic, decompose it into
+dependency-aware work units, assign each unit an explicit contract, and claim
+the unit before any implementation edit. It dispatches only READY units with
+disjoint ownership, then independently validates every worker result and runs a
+fresh adversarial review before delivery. A worker may not bypass the
+orchestrator, broaden its allowed-file scope, close another worker's task, or
+merge directly.
+
+## Delivery Gate
+
+No implementation is complete until the orchestrator has recorded validation
+evidence, committed with the Beads ID, synchronized Beads, and opened a pull
+request containing the contract, changed-file scope, tests, and review trace.
+Merge is permitted only after CI and the fresh adversarial review pass. If a
+gate fails, return to the owning work unit; after three failed automatic cycles,
+escalate with evidence rather than bypassing the gate.
+
 ## Durable State
 
 - Beads is the source of truth for epics, work units, dependencies, readiness,
