@@ -14,6 +14,15 @@ npm run preto-velho -- "descreva a implementação"
 Isso executa `copilot --agent=preto-velho`. Iniciar o CLI sem selecionar esse
 agente pode permitir um bypass do orquestrador.
 
+### Canary operacional
+
+```bash
+python scripts/validate-agent-harness.py
+python scripts/smoke-beads-dag.py
+npm run observability:validate
+git diff --check
+```
+
 ## WhatsApp LangGraph Audio Pipeline
 
 Ambiente inicial para processar uma conversa do WhatsApp, separar mensagens de texto e audio, passar os audios por uma etapa de processamento ElevenLabs e enviar tudo para um agente dummy.
