@@ -1,6 +1,8 @@
 ---
 name: caveman-boundary
 description: "Protects Metaswarm and Beads machine-readable contracts from Caveman compression while allowing concise human-facing communication."
+user-invocable: false
+disable-model-invocation: false
 ---
 
 # Caveman Boundary

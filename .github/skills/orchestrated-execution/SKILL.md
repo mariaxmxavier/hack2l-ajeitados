@@ -1,6 +1,8 @@
 ---
 name: orchestrated-execution
 description: "Copilot-native adapter for Metaswarm work-unit execution using Beads, Fleet-safe ownership, independent validation, and fresh adversarial review."
+user-invocable: false
+disable-model-invocation: false
 ---
 
 # Orchestrated Execution Adapter
